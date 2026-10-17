@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-canvas-width="1000" data-canvas-height="625">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三幕 · 过渡影像</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:#0a0805;color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:#120e08;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
+  overflow:hidden;opacity:0;transition:opacity .7s ease-out,transform .7s ease-out;transform:scale(.988)}
+.stage.in{opacity:1;transform:scale(1)}
+/* 放映氛围背景 */
+.bg{position:absolute;inset:0;background:
+  radial-gradient(120% 100% at 50% 40%,rgba(190,150,90,.16),transparent 60%),
+  linear-gradient(180deg,#241a10,#120d07 55%,#0b0805)}
+.bg::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 2px,transparent 2px 5px);
+  mix-blend-mode:multiply;opacity:.35}
+.beam{position:absolute;z-index:1;left:50%;top:46%;width:64%;height:46%;
+  transform:translate(-50%,-50%);pointer-events:none;opacity:.5;
+  background:radial-gradient(52% 100% at 50% 50%,rgba(233,200,140,.24),transparent 72%);
+  animation:flick 4.6s ease-in-out infinite}
+@keyframes flick{0%,100%{opacity:.42}47%{opacity:.6}52%{opacity:.36}}
+/* 左上日晷 */
+.dial-btn{position:absolute;z-index:20;left:2vmin;top:2vmin;width:clamp(54px,8.4vmin,88px);
+  aspect-ratio:1;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));
+  transition:transform .25s ease}
+.dial-btn:hover{transform:scale(1.06) rotate(6deg)}
+.dial-btn svg{width:100%;height:100%}
+/* 标题 */
+.title{position:absolute;z-index:10;left:50%;top:clamp(14px,3vmin,36px);transform:translateX(-50%);
+  text-align:center;pointer-events:none}
+.title .act{font-size:clamp(11px,1.7vmin,16px);color:#cbb98a;letter-spacing:.42em;text-indent:.42em;
+  text-shadow:0 1px 6px rgba(0,0,0,.9)}
+.title .date{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(22px,4.2vmin,42px);
+  color:#f0e0ae;letter-spacing:.28em;text-indent:.28em;text-shadow:0 3px 12px rgba(0,0,0,.75)}
+.title .rule{display:block;width:clamp(60px,12vmin,130px);height:1px;margin:.3em auto 0;
+  background:linear-gradient(90deg,transparent,#c9a86a,transparent)}
+/* 放映机 */
+.projector{position:absolute;z-index:8;left:50%;top:52%;transform:translate(-50%,-50%);
+  width:min(76%,880px);aspect-ratio:16/9}
+.pr-frame{position:absolute;inset:0;border-radius:6px;overflow:hidden;
+  border:clamp(3px,.5vmin,5px) solid rgba(201,168,106,.5);
+  box-shadow:0 24px 60px rgba(0,0,0,.65),inset 0 0 0 clamp(2px,.3vmin,3px) rgba(0,0,0,.6);
+  background:#000}
+video{width:100%;height:100%;object-fit:contain;display:block;background:#000}
+.pr-frame::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 45%,transparent 60%,rgba(10,6,2,.5) 100%)}
+/* 胶片孔装饰 */
+.hole{position:absolute;top:50%;transform:translateY(-50%);width:clamp(6px,.8vmin,9px);
+  height:clamp(14px,2.2vmin,22px);background:#1c140a;border:1px solid rgba(201,168,106,.35)}
+.hole.l{left:-1.6%}.hole.r{right:-1.6%}
+/* 播放遮罩与按钮 */
+.cover{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:1.6vmin;background:rgba(10,7,3,.34);cursor:pointer}
+.cover .pb{width:clamp(72px,11vmin,110px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 36% 30%,#e9c98c,#c99a4e 64%,#8a6a2f);
+  border:clamp(2px,.35vmin,3px) solid #f0e3c0;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 10px 26px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.35);
+  font-size:clamp(26px,4.6vmin,44px);color:#3a2813;text-indent:.12em;transition:transform .2s}
+.cover .pb:hover{transform:scale(1.08)}
+.cover .pt{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(17px,2.9vmin,27px);
+  color:#f2e2b4;letter-spacing:.3em;text-indent:.3em;text-shadow:0 2px 10px rgba(0,0,0,.85)}
+.cover .ps{font-size:clamp(10px,1.5vmin,14px);color:#b9a376;letter-spacing:.18em}
+.cover.hide{opacity:0;pointer-events:none;transition:opacity .5s}
+/* 跳过 / 继续 */
+.go{position:absolute;z-index:12;left:50%;bottom:clamp(14px,2.6vmin,26px);transform:translateX(-50%);
+  font-size:clamp(13px,2vmin,19px);color:#3a2813;background:linear-gradient(160deg,#e8c98c,#cf9f55);
+  border:1px solid #a87934;border-radius:999px;padding:.5em 1.9em .55em;cursor:pointer;
+  letter-spacing:.24em;text-indent:.24em;box-shadow:0 8px 22px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,240,200,.7);
+  opacity:0;pointer-events:none;transition:opacity .45s,transform .2s}
+.go.on{opacity:1;pointer-events:auto;animation:goldPulse 1.2s ease-in-out infinite}
+.go:hover{transform:translateY(-2px) scale(1.03)}
+@keyframes goldPulse{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 0 0 rgba(217,163,92,.55)}
+  50%{box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 0 12px rgba(217,163,92,0)}}
+/* 播放中提示 */
+.playing-hint{position:absolute;z-index:6;left:50%;bottom:clamp(6px,1.4vmin,14px);transform:translateX(-50%);
+  font-size:clamp(9px,1.3vmin,12px);color:rgba(201,168,106,.65);letter-spacing:.22em;pointer-events:none}
+.fade-out{transition:opacity .5s ease !important;opacity:0 !important}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="stage" id="stage">
+    <div class="bg"></div>
+    <div class="beam"></div>
+
+    <!-- 左上日晷 -->
+    <div class="dial-btn" id="dialBtn"></div>
+
+    <!-- 标题 -->
+    <div class="title">
+      <span class="act">第 三 幕 · 过 渡 影 像</span>
+      <span class="date">那年 · 南京</span>
+      <span class="rule"></span>
+    </div>
+
+    <!-- 放映机 -->
+    <div class="projector">
+      <span class="hole l"></span><span class="hole r"></span>
+      <div class="pr-frame">
+        <video id="vd" src="assets/p10-bridge-video.mp4" playsinline></video>
+        <div class="cover" id="cover">
+          <div class="pb">▶</div>
+          <div class="pt">播放这段旧影像</div>
+          <div class="ps">影片长约两分钟 · 可随时跳过</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="go" id="goBtn">跳过影像，继续剧情 ›</div>
+    <div class="playing-hint">正在放映 · 播完将自动继续</div>
+  </div>
+</div>
+<script>
+(function(){
+var stage=document.getElementById('stage');
+setTimeout(function(){stage.classList.add('in');},80);
+
+/* 日晷（青铜大日晷 · 未时） */
+var dialBtn=document.getElementById('dialBtn');
+(function(){
+  var hour=7,a=(hour*30+90)%360;
+  var NAME=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  dialBtn.innerHTML='<svg viewBox="0 0 100 100"><defs>'+
+    '<radialGradient id="vbr" cx="38%" cy="30%" r="80%"><stop offset="0%" stop-color="#b9a26b"/><stop offset="52%" stop-color="#8a7448"/><stop offset="100%" stop-color="#4d3a1c"/></radialGradient>'+
+    '<radialGradient id="vrim" cx="44%" cy="36%" r="85%"><stop offset="0%" stop-color="#d9c48e"/><stop offset="100%" stop-color="#6b5630"/></radialGradient></defs>'+
+    '<circle cx="50" cy="50" r="46" fill="url(#vrim)"/>'+
+    '<circle cx="50" cy="50" r="40" fill="url(#vbr)"/>'+
+    '<circle cx="50" cy="50" r="33" fill="none" stroke="rgba(70,52,20,.55)" stroke-width="1.2" stroke-dasharray="2 5"/>'+
+    '<g stroke="#caa86a" stroke-width="1.5" opacity=".9">'+
+    '<line x1="50" y1="12" x2="50" y2="20"/><line x1="50" y1="80" x2="50" y2="88"/>'+
+    '<line x1="12" y1="50" x2="20" y2="50"/><line x1="80" y1="50" x2="88" y2="50"/>'+
+    '<line x1="23" y1="23" x2="28.5" y2="28.5"/><line x1="71.5" y1="71.5" x2="77" y2="77"/>'+
+    '<line x1="77" y1="23" x2="71.5" y2="28.5"/><line x1="28.5" y1="71.5" x2="23" y2="77"/></g>'+
+    '<text x="50" y="16" text-anchor="middle" font-size="9" fill="#f4e4b8" font-family="Kaiti SC,STKaiti,serif">'+NAME[hour]+'</text>'+
+    '<g transform="rotate('+a+' 50 50)"><path d="M50 54 L47.6 22 L52.4 22 Z" fill="#d8b064"/>'+
+    '<path d="M44.5 30 L50 44 L55.5 30" fill="none" stroke="#c9a75f" stroke-width="1.4" stroke-linecap="round"/>'+
+    '<line x1="50" y1="56" x2="50" y2="70" stroke="#a5874e" stroke-width="1.4"/></g>'+
+    '<circle cx="50" cy="50" r="2.6" fill="#c9a75f"/></svg>';
+})();
+dialBtn.addEventListener('click',function(e){e.stopPropagation();});
+
+/* 播放控制 */
+var vd=document.getElementById('vd'),cover=document.getElementById('cover');
+var goBtn=document.getElementById('goBtn');
+cover.addEventListener('click',function(){
+  vd.play().catch(function(){});
+  cover.classList.add('hide');
+});
+vd.addEventListener('play',function(){cover.classList.add('hide');});
+vd.addEventListener('ended',function(){goFinal();});
+function goFinal(){
+  stage.classList.add('fade-out');
+  setTimeout(function(){location.href='第三幕-题4-遗物排序.html';},800);
+}
+goBtn.addEventListener('click',goFinal);
+vd.addEventListener('click',function(){if(vd.paused){vd.play();}else{vd.pause();}});
+})();
+</script>
+</body>
+</html>

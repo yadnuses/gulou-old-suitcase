@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>序章 · 开箱</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:radial-gradient(130% 100% at 50% 8%,#241d15 0%,#17120c 55%,#0a0805 100%);
+  color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{
+  position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:#0a0805;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);
+  overflow:hidden;animation:stageIn .7s ease-out both;
+}
+@keyframes stageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.table-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.lamp-glow{position:absolute;z-index:3;inset:0;pointer-events:none;
+  background:radial-gradient(38% 30% at 84% 16%,rgba(255,214,140,.20),transparent 70%),
+             radial-gradient(120% 110% at 50% 45%,transparent 58%,rgba(10,8,6,.38) 100%)}
+.vignette{position:absolute;z-index:4;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(8,6,4,.30) 0%,transparent 26%,transparent 78%,rgba(8,6,4,.42) 100%)}
+
+/* ============ 左上日晷（亥时） ============ */
+.sundial{position:absolute;z-index:20;left:clamp(14px,2.4vmin,26px);top:clamp(12px,2.1vmin,22px);
+  width:clamp(30px,4.4vmin,46px);height:clamp(30px,4.4vmin,46px);pointer-events:none;opacity:.96}
+.sundial svg{width:100%;height:100%;display:block;overflow:visible;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}
+
+/* ============ 物品层（进入即满箱，逐件点击收入背包） ============ */
+.fly-item{position:absolute;z-index:10;opacity:1;will-change:transform,opacity;cursor:pointer;
+  transition:none}
+.fly-item img{width:100%;height:100%;object-fit:contain;display:block;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.42));
+  transition:filter .2s ease}
+.fly-item:hover img{filter:brightness(1.13) drop-shadow(0 8px 14px rgba(0,0,0,.5))}
+
+/* 满箱漂浮微动（独立 translate，不影响旋转） */
+.fly-item.settled{animation:itemSettle 5s ease-in-out infinite}
+@keyframes itemSettle{0%,100%{translate:0 0}50%{translate:0 -4px}}
+
+/* 收走：向上弹起后坠向背包 */
+.fly-item.collecting{pointer-events:none;cursor:default;
+  animation:collectItem .9s cubic-bezier(.32,.1,.28,1) forwards}
+@keyframes collectItem{
+  0%{transform:translate(0,0) rotate(var(--r,0deg)) scale(1);opacity:1}
+  32%{transform:translate(0,-16%) rotate(calc(var(--r,0deg) - 10deg)) scale(1.08);opacity:1}
+  100%{transform:translate(0,52%) rotate(calc(var(--r,0deg) + 16deg)) scale(.18);opacity:0}
+}
+
+/* 点击物品时浮现名字 */
+.item-name-tag{position:absolute;z-index:50;left:0;top:0;pointer-events:none;opacity:0;
+  transform:translate(-50%,-130%);
+  font-family:"Noto Serif SC","Songti SC","STSong",serif;font-weight:600;
+  font-size:clamp(13px,2.1vmin,20px);letter-spacing:.22em;text-indent:.22em;
+  color:#f8e9c4;background:linear-gradient(180deg,rgba(56,40,20,.92),rgba(32,22,11,.94));
+  border:1px solid rgba(217,163,92,.78);border-radius:clamp(5px,.8vmin,9px);
+  padding:.22em .8em;box-shadow:0 6px 18px rgba(0,0,0,.45);
+  white-space:nowrap}
+.item-name-tag.show{animation:nameFloat 1.15s ease-out both}
+@keyframes nameFloat{
+  0%{opacity:0;transform:translate(-50%,-90%) scale(.85)}
+  22%{opacity:1;transform:translate(-50%,-128%) scale(1.06)}
+  70%{opacity:1;transform:translate(-50%,-138%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-162%) scale(.92)}
+}
+
+/* ============ 旁白（打字机） ============ */
+.narration{position:absolute;z-index:21;left:0;right:0;bottom:15.5%;text-align:center;pointer-events:none;
+  font-family:"Courier New",monospace,"Noto Serif SC",serif;
+  font-size:clamp(14px,2.3vmin,23px);letter-spacing:.10em;color:#f7efda;
+  text-shadow:0 1px 3px rgba(0,0,0,.65),0 0 14px rgba(0,0,0,.35);min-height:2em}
+.caret{display:inline-block;width:.55em;height:1.05em;vertical-align:-.16em;margin-left:.08em;
+  background:#e8d5a2;animation:blink 1s steps(2) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* ============ 三角按钮（背包入口） ============ */
+.tri-btn{position:absolute;z-index:22;left:46.3%;bottom:clamp(6px,1.1vmin,12px);width:7.4%;height:5.2%;
+  min-width:52px;min-height:30px;border:0;background:transparent;cursor:pointer;padding:0;
+  opacity:.92;transition:opacity .25s}
+.tri-btn:hover{opacity:1}
+.tri-btn svg{width:100%;height:100%;display:block;overflow:visible}
+
+/* ============ 背包面板 ============ */
+.scrim{position:absolute;inset:0;z-index:30;background:rgba(7,5,3,.5);opacity:0;
+  pointer-events:none;transition:opacity .35s}
+.scrim.on{opacity:1;pointer-events:auto}
+.inventory-panel{position:absolute;left:0;right:0;bottom:0;z-index:31;
+  transform:translateY(103%);transition:transform .48s cubic-bezier(.22,.9,.3,1);
+  background:linear-gradient(180deg,rgba(48,33,18,.97),rgba(27,18,9,.98) 45%,rgba(15,10,5,.99));
+  border-top:1px solid rgba(217,163,92,.42);
+  box-shadow:0 -14px 44px rgba(0,0,0,.55);
+  padding:clamp(10px,1.6vmin,18px) clamp(12px,2.6vmin,30px) clamp(16px,2.8vmin,30px)}
+.inventory-panel.open{transform:translateY(0)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(10px,1.5vmin,16px)}
+.panel-title{font-size:clamp(13px,2.1vmin,19px);font-weight:600;color:#f2dcaa;letter-spacing:.1em}
+.panel-title em{font-style:normal;font-size:.72em;color:#a8986f;letter-spacing:.05em}
+.panel-close{background:none;border:0;color:#d9b97f;font-size:clamp(16px,2.6vmin,24px);
+  line-height:1;cursor:pointer;padding:4px 6px}
+.panel-close:hover{color:#ffe0a8}
+.empty-tip{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);
+  font-size:clamp(15px,2.5vmin,22px);color:rgba(226,205,160,.6);letter-spacing:.4em;text-indent:.4em;
+  pointer-events:none;transition:opacity .4s}
+.empty-tip.hide{opacity:0}
+.item-grid{display:flex;gap:clamp(8px,1.5vmin,16px);justify-content:center;position:relative}
+.item-slot{width:clamp(52px,8.2vmin,92px);aspect-ratio:1/1;position:relative;padding:0;
+  border:1px dashed rgba(217,163,92,.38);border-radius:9px;background:rgba(35,26,15,.4);
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.item-slot img{width:86%;height:86%;object-fit:contain;display:block;
+  opacity:0;transform:scale(.55);transition:opacity .4s,transform .45s cubic-bezier(.2,.9,.3,1);
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.item-slot.on{border-style:solid;border-color:rgba(255,214,140,.8);background:rgba(50,36,18,.65);
+  box-shadow:0 0 0 1px rgba(255,190,110,.18),0 0 18px rgba(255,190,110,.18);animation:slotGlow .8s ease}
+.item-slot.on img{opacity:1;transform:scale(1)}
+@keyframes slotGlow{0%{box-shadow:0 0 0 1px rgba(255,190,110,.18),0 0 0 rgba(255,190,110,0)}50%{box-shadow:0 0 0 1px rgba(255,190,110,.5),0 0 26px rgba(255,190,110,.45)}100%{box-shadow:0 0 0 1px rgba(255,190,110,.18),0 0 18px rgba(255,190,110,.18)}}
+.slot-name{position:absolute;left:50%;bottom:-1.35em;transform:translateX(-50%);
+  font-size:clamp(10px,1.35vmin,13px);color:#e9dab8;white-space:nowrap;opacity:.9;letter-spacing:.04em}
+
+/* ============ 转场：明信片钟表咔动 ============ */
+.transit{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(90% 90% at 50% 50%,rgba(15,10,5,.55),rgba(6,4,2,.88))}
+.transit.on{display:flex}
+.transit-card{position:relative;width:clamp(170px,26vmin,290px);aspect-ratio:868/794;pointer-events:none;
+  animation:cardPop .55s cubic-bezier(.2,1.4,.3,1) both}
+.transit-card img{width:100%;height:100%;object-fit:contain;display:block;
+  filter:drop-shadow(0 14px 30px rgba(0,0,0,.6))}
+@keyframes cardPop{from{opacity:0;transform:scale(.72) rotate(-8deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+/* 叠加的铅笔指针：精确对齐图内钟心（397,475），3:00 整组咔动推进 */
+.clock-hands{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
+  transform-box:view-box;transform-origin:397px 475px;transform:rotate(0deg)}
+.clock-hands .hands-group{stroke:#3f382e}
+.clock-hands.tick{animation:handTick .9s steps(2,end) both}
+@keyframes handTick{from{transform:rotate(0deg)}to{transform:rotate(22deg)}}
+
+/* 落定提示 */
+.toast{position:absolute;z-index:45;left:50%;top:11%;transform:translate(-50%,-8px);opacity:0;
+  pointer-events:none;max-width:84%;text-align:center;
+  background:rgba(17,11,6,.86);border:1px solid rgba(217,163,92,.5);color:#f6ecd4;
+  padding:.5em 1em;border-radius:6px;font-size:clamp(12px,1.8vmin,16px);letter-spacing:.06em;
+  transition:opacity .3s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.fade-out{transition:opacity .5s ease !important;opacity:0 !important}
+@media (prefers-reduced-motion:reduce){.fly-item,.fly-item.settled,.transit-card,.clock-hands,.caret{animation:none}}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page" id="page">
+  <div class="stage" id="stage">
+    <img class="table-bg" src="assets/open-table.png" alt="民宿木质桌面上的旧皮箱">
+    <div class="lamp-glow" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <!-- 左上日晷（亥时） -->
+    <div class="sundial" aria-hidden="true" title="亥时 · 夜">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="bronze" cx="38%" cy="32%" r="75%">
+            <stop offset="0%" stop-color="#8f9a82"/><stop offset="55%" stop-color="#5d6f5e"/>
+            <stop offset="100%" stop-color="#35442f"/>
+          </radialGradient>
+          <radialGradient id="rim" cx="45%" cy="38%" r="80%">
+            <stop offset="0%" stop-color="#a8b295"/><stop offset="100%" stop-color="#46523c"/>
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="url(#rim)"/>
+        <circle cx="50" cy="50" r="40" fill="url(#bronze)"/>
+        <g stroke="#caa86a" stroke-width="1.6" opacity=".85">
+          <line x1="50" y1="12" x2="50" y2="20"/>
+          <line x1="50" y1="80" x2="50" y2="88"/>
+          <line x1="12" y1="50" x2="20" y2="50"/>
+          <line x1="80" y1="50" x2="88" y2="50"/>
+          <line x1="23" y1="23" x2="28.5" y2="28.5"/>
+          <line x1="71.5" y1="71.5" x2="77" y2="77"/>
+          <line x1="77" y1="23" x2="71.5" y2="28.5"/>
+          <line x1="28.5" y1="71.5" x2="23" y2="77"/>
+        </g>
+        <!-- 晷针指向亥时（钟面 21:00 = 左偏下 315°） -->
+        <g transform="rotate(315 50 50)">
+          <path d="M50 54 L47.6 20 L52.4 20 Z" fill="#d8b064"/>
+          <line x1="50" y1="56" x2="50" y2="70" stroke="#a5874e" stroke-width="1.4"/>
+        </g>
+        <circle cx="50" cy="50" r="2.6" fill="#c9a75f"/>
+      </svg>
+    </div>
+
+    <!-- 物品飞入层 -->
+    <div id="flyLayer">
+      <img class="fly-item" data-idx="0" src="assets/item-letter.png" alt="信">
+      <img class="fly-item" data-idx="1" src="assets/item-postcard.png" alt="明信片">
+      <img class="fly-item" data-idx="2" src="assets/item-key.png" alt="钥匙">
+      <img class="fly-item" data-idx="3" src="assets/item-photo.png" alt="照片">
+      <img class="fly-item" data-idx="4" src="assets/item-receipt.png" alt="小票">
+      <img class="fly-item" data-idx="5" src="assets/item-book.png" alt="样书">
+      <span class="item-name-tag" id="itemNameTag"></span>
+    </div>
+
+    <!-- 旁白 -->
+    <div class="narration" id="narration" aria-live="polite"><span id="typeText"></span><span class="caret" id="caret"></span></div>
+
+    <!-- 三角按钮 -->
+    <button class="tri-btn" id="invBtn" aria-label="打开背包">
+      <svg viewBox="0 0 100 60">
+        <path d="M12 6 L88 6 L50 52 Z" fill="rgba(52,34,16,.92)" stroke="#d9a35c" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M50 14 L62 34 L38 34 Z" fill="#d9a35c" opacity=".9"/>
+      </svg>
+    </button>
+
+    <!-- 背包面板 -->
+    <div class="scrim" id="scrim"></div>
+    <div class="inventory-panel" id="panel">
+      <div class="panel-head">
+        <div class="panel-title">背包<em> · 外婆的旧物</em></div>
+        <button class="panel-close" id="panelClose" aria-label="关闭背包">×</button>
+      </div>
+      <div class="item-grid" id="itemGrid">
+        <div class="item-slot"><img src="assets/item-letter.png" alt="信"><span class="slot-name">信</span></div>
+        <div class="item-slot"><img src="assets/item-postcard.png" alt="明信片"><span class="slot-name">明信片</span></div>
+        <div class="item-slot"><img src="assets/item-key.png" alt="钥匙"><span class="slot-name">钥匙</span></div>
+        <div class="item-slot"><img src="assets/item-photo.png" alt="照片"><span class="slot-name">照片</span></div>
+        <div class="item-slot"><img src="assets/item-receipt.png" alt="小票"><span class="slot-name">小票</span></div>
+        <div class="item-slot"><img src="assets/item-book.png" alt="样书"><span class="slot-name">样书</span></div>
+        <div class="empty-tip" id="emptyTip">空</div>
+      </div>
+    </div>
+
+    <!-- 转场：明信片钟表咔动 -->
+    <div class="transit" id="transit">
+      <div class="transit-card">
+        <img src="assets/item-postcard.png" alt="明信片背面的铅笔画钟表">
+        <svg class="clock-hands" id="clockHand" viewBox="0 0 868 794" aria-hidden="true">
+          <g class="hands-group">
+            <line x1="397" y1="475" x2="397" y2="286" stroke-width="10" stroke-linecap="round"/>
+            <line x1="397" y1="475" x2="508" y2="475" stroke-width="13" stroke-linecap="round"/>
+            <circle cx="397" cy="475" r="13" fill="none" stroke-width="4"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var ITEMS=[
+  {name:'信',      land:{l:'38%', t:'43%', w:17,  r:-8}},
+  {name:'明信片',  land:{l:'54%', t:'42%', w:20,  r:6}},
+  {name:'钥匙',    land:{l:'37%', t:'51%', w:13,  r:14}},
+  {name:'照片',    land:{l:'55%', t:'50%', w:14,  r:-10}},
+  {name:'小票',    land:{l:'44.5%',t:'56%', w:12.5,r:4}},
+  {name:'样书',    land:{l:'50.5%',t:'46%', w:14.5,r:-5}}
+];
+var flyLayer=document.getElementById('flyLayer');
+var flyImgs=Array.prototype.slice.call(flyLayer.querySelectorAll('img.fly-item'));
+var narration=document.getElementById('narration');
+var typeText=document.getElementById('typeText');
+var caret=document.getElementById('caret');
+var invBtn=document.getElementById('invBtn');
+var panel=document.getElementById('panel');
+var scrim=document.getElementById('scrim');
+var panelClose=document.getElementById('panelClose');
+var itemGrid=document.getElementById('itemGrid');
+var emptyTip=document.getElementById('emptyTip');
+var transit=document.getElementById('transit');
+var clockHand=document.getElementById('clockHand');
+var toastEl=document.getElementById('toast');
+var slots=Array.prototype.slice.call(itemGrid.querySelectorAll('.item-slot'));
+var state={started:false,invOpen:false,slot:0,collected:0,gone:{}};
+var toastTimer=null;
+
+/* ---------- 音效（Web Audio 合成） ---------- */
+var AC=window.AudioContext||window.webkitAudioContext;
+var actx=AC?new AC():null;
+function blip(freq,dur,type,vol,when){
+  if(!actx)return;
+  var t=actx.currentTime+(when||0);
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'square';o.frequency.value=freq;
+  g.gain.setValueAtTime(vol||.12,t);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g);g.connect(actx.destination);
+  o.start(t);o.stop(t+dur+.02);
+}
+function keyClick(){if(window.__sfx)window.__sfx.key();}
+function itemDrop(){blip(240,.12,'triangle',.16);blip(120,.18,'sine',.14,.02);}
+function tickTock(){
+  blip(520,.07,'square',.12);
+  blip(660,.06,'square',.10,.11);
+  blip(880,.05,'triangle',.12,.22);
+}
+
+/* ---------- 旁白打字机 ---------- */
+var LINE='黄铜锁锈得辨不出颜色。';
+function typeLine(cb){
+  typeText.textContent='';
+  var i=0;
+  (function step(){
+    if(i<LINE.length){
+      typeText.textContent+=LINE.charAt(i);
+      i++;keyClick();
+      setTimeout(step,95+Math.random()*75);
+    }else{
+      caret.style.display='none';
+      if(cb)cb();
+    }
+  })();
+}
+
+/* ---------- 背包槽位 ---------- */
+function openInv(force){
+  var willOpen=(typeof force==='boolean')?force:!state.invOpen;
+  state.invOpen=willOpen;
+  panel.classList.toggle('open',willOpen);
+  scrim.classList.toggle('on',willOpen);
+}
+invBtn.addEventListener('click',function(e){e.stopPropagation();openInv();});
+scrim.addEventListener('click',function(){openInv(false);});
+panelClose.addEventListener('click',function(){openInv(false);});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&state.invOpen)openInv(false);
+});
+function toast(msg){
+  toastEl.textContent=msg;toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){toastEl.classList.remove('show');},2400);
+}
+
+/* ---------- 满箱布置：物品已在箱内 ---------- */
+function placeItems(){
+  ITEMS.forEach(function(it,i){
+    var w=flyImgs[i],s=it.land,st=w.style;
+    st.left=s.l;st.top=s.t;st.width=s.w+'%';
+    st.setProperty('--r',s.r+'deg');
+    st.transform='rotate('+s.r+'deg)';
+    w.classList.add('settled');
+  });
+}
+
+/* ---------- 逐件收进背包 ---------- */
+function showName(idx,el){
+  var tag=document.getElementById('itemNameTag');
+  tag.textContent=ITEMS[idx].name;
+  tag.style.left=el.offsetLeft+'px';
+  tag.style.top=el.offsetTop+'px';
+  tag.classList.remove('show');void tag.offsetWidth;tag.classList.add('show');
+}
+function collectItem(idx){
+  var w=flyImgs[idx];
+  w.classList.remove('settled');
+  w.classList.add('collecting');
+  showName(idx,w);
+  // 点亮背包槽位
+  var slot=slots[idx];
+  slot.classList.add('on');
+  if(state.collected===0)emptyTip.classList.add('hide');
+  itemDrop();
+  state.collected++;
+  if(state.collected===ITEMS.length){
+    setTimeout(function(){startTransit();},1000);
+  }
+}
+
+/* ---------- 交互：点击物品 → 收入背包 ---------- */
+flyLayer.addEventListener('click',function(e){
+  var t=e.target;
+  if(!t||!t.classList||!t.classList.contains('fly-item'))return;
+  var idx=parseInt(t.dataset.idx,10);
+  if(isNaN(idx)||state.gone[idx])return;
+  state.gone[idx]=true;
+  collectItem(idx);
+});
+
+/* ---------- 转场：明信片钟表咔动 ---------- */
+function startTransit(){
+  transit.classList.add('on');
+  clockHand.classList.add('tick');
+  tickTock();
+  setTimeout(function(){
+    document.getElementById('page').classList.add('fade-out');
+    setTimeout(function(){window.location.href='序章-明信片.html';},520);
+  },1500);
+}
+
+/* ---------- 交互：点击物品 → 收入背包（详见上方 flyLayer 监听） ---------- */
+
+/* 进入页面：旁白打字机自动打出 */
+typeLine();
+placeItems();
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>

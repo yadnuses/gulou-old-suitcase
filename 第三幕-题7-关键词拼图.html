@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>题7 · 关键词拼图</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:radial-gradient(120% 100% at 50% 10%,#2b241c 0%,#17120c 55%,#0a0805 100%);
+  color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:radial-gradient(120% 100% at 50% 8%,#2e2620 0%,#18130e 55%,#0a0805 100%);
+  box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;
+  opacity:0;transform:scale(.988);transition:opacity .7s ease-out,transform .7s ease-out}
+.stage.in{opacity:1;transform:scale(1)}
+
+/* 日晷（酉时 · 黄昏） */
+.dial-btn{position:absolute;z-index:20;left:2vmin;top:2vmin;width:clamp(54px,8.4vmin,88px);
+  aspect-ratio:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.dial-btn svg{width:100%;height:100%}
+.bag-tri{position:absolute;z-index:30;left:50%;bottom:clamp(4px,1vmin,12px);transform:translateX(-50%);
+  width:clamp(26px,4.2vmin,44px);height:clamp(26px,4.2vmin,44px);
+  display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))}
+
+/* 提示 */
+.hint{position:absolute;z-index:10;left:50%;top:11%;transform:translateX(-50%);text-align:center;pointer-events:none}
+.hint .pre{display:block;font-size:clamp(11px,1.7vmin,16px);color:#9aa89a;letter-spacing:.5em;margin-bottom:.7em}
+.hint h1{font-size:clamp(18px,3.2vmin,32px);font-weight:700;color:#f0e3c4;letter-spacing:.2em}
+.hint .sub{margin-top:.7em;font-size:clamp(12px,1.9vmin,18px);color:#cbb98a;letter-spacing:.16em}
+.hint .rule{display:block;width:clamp(70px,13vmin,140px);height:1px;margin:.9em auto 0;
+  background:linear-gradient(90deg,transparent,#c9a86a,transparent)}
+
+/* 拼图区 */
+.puzzle{position:absolute;z-index:12;left:50%;top:49%;transform:translate(-50%,-50%);text-align:center;width:min(92%,1100px)}
+.slots{display:flex;justify-content:center;gap:clamp(6px,1.2vmin,14px);margin-bottom:clamp(18px,3vmin,34px)}
+.slot{width:clamp(64px,11.5vmin,124px);height:clamp(52px,9vmin,96px);border-radius:4px;
+  background:rgba(20,13,7,.66);border:1px dashed rgba(201,168,106,.55);
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(16px,3vmin,30px);color:#f2e7cf;letter-spacing:.1em;
+  transition:border-color .25s,background .25s,box-shadow .25s}
+.slot.filled{border-style:solid;border-color:rgba(217,163,92,.9);background:rgba(56,40,20,.72);
+  box-shadow:0 0 14px rgba(217,163,92,.2);cursor:pointer}
+.slot.filled:hover{border-color:rgba(240,200,130,.95)}
+.slot.glow{animation:slotGlow 1.1s ease}
+@keyframes slotGlow{0%{box-shadow:0 0 0 rgba(255,200,120,0)}40%{box-shadow:0 0 22px rgba(255,200,120,.55)}100%{box-shadow:0 0 0 rgba(255,200,120,0)}}
+.words{display:flex;justify-content:center;flex-wrap:wrap;gap:clamp(8px,1.4vmin,16px)}
+.word{width:clamp(64px,11.5vmin,124px);height:clamp(52px,9vmin,96px);border-radius:4px;
+  background:radial-gradient(120% 120% at 50% 0%,#7c6134,#5a4422 68%,#46341a);
+  border:1px solid rgba(240,200,130,.5);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:clamp(16px,3vmin,30px);color:#f6ecd0;letter-spacing:.1em;
+  box-shadow:0 5px 12px rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,255,255,.05);
+  transition:transform .15s,filter .15s,opacity .3s}
+.word:hover{transform:translateY(-3px);filter:brightness(1.12)}
+.word.used{opacity:0;pointer-events:none;transform:scale(.86)}
+.word.taken{outline:2px solid rgba(255,214,140,.85);outline-offset:2px}
+.tip{margin-top:clamp(14px,2.2vmin,24px);font-size:clamp(11px,1.7vmin,16px);color:#a89670;letter-spacing:.22em;opacity:0;transition:opacity .4s}
+.tip.on{opacity:1}
+
+/* 照片演出 */
+.photo-show{position:absolute;z-index:40;left:50%;top:50%;transform:translate(-50%,120vh) scale(.62);
+  opacity:0;transition:transform 1s cubic-bezier(.2,.9,.3,1),opacity .9s ease;pointer-events:none}
+.photo-show.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.photo-frame{position:relative;width:clamp(220px,34vmin,380px);aspect-ratio:648/475;overflow:hidden;
+  border-radius:3px;box-shadow:0 26px 60px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14);
+  background:#1a120a}
+.photo-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ph-bw{filter:grayscale(1) contrast(.98) brightness(.96)}
+.ph-color{-webkit-mask-image:linear-gradient(105deg,transparent 38%,#000 54%);
+  -webkit-mask-size:260% 100%;-webkit-mask-position:-120% 0;mask-image:linear-gradient(105deg,transparent 38%,#000 54%);
+  mask-size:260% 100%;mask-position:-120% 0}
+.photo-show.coloring .ph-color{-webkit-mask-position:220% 0;mask-position:220% 0;
+  transition:-webkit-mask-position 3.2s cubic-bezier(.5,.1,.3,1),mask-position 3.2s cubic-bezier(.5,.1,.3,1)}
+.photo-show .ph-cap{position:absolute;left:50%;bottom:-2.3em;transform:translateX(-50%);width:max-content;max-width:56vmin;
+  font-size:clamp(13px,2vmin,19px);color:#e8dcc0;letter-spacing:.14em;text-shadow:0 2px 8px rgba(0,0,0,.8);
+  text-align:center;white-space:pre-wrap;min-height:1.8em}
+.photo-show .ph-tag{position:absolute;left:-1.1em;top:-1.1em;width:clamp(30px,4.6vmin,52px);aspect-ratio:1;
+  background:radial-gradient(circle at 35% 30%,#c0452f,#a01f14 62%,#7c1208);
+  border:2px solid rgba(255,220,190,.55);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(12px,1.9vmin,18px);color:#f6e6d0;font-weight:700;
+  box-shadow:0 4px 10px rgba(0,0,0,.4);animation:tagPulse 2.2s ease-in-out infinite}
+@keyframes tagPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+.fade-out{transition:opacity .55s ease !important;opacity:0 !important}
+/* 背包面板（统一） */
+.bag-panel{position:absolute;z-index:40;left:50%;bottom:clamp(30px,6.4vmin,74px);transform:translateX(-50%) translateY(10px);
+  width:clamp(210px,34vmin,340px);opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s ease;
+  background:linear-gradient(165deg,rgba(28,22,14,.96),rgba(16,12,7,.97));border:1px solid rgba(214,170,96,.5);border-radius:12px;
+  box-shadow:0 14px 40px rgba(0,0,0,.6),inset 0 0 24px rgba(120,90,40,.12)}
+.bag-panel.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.bag-panel .inner{padding:clamp(10px,1.8vmin,16px)}
+.bag-panel .bag-title{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(12px,1.9vmin,16px);color:#e8cf9c;letter-spacing:.2em;margin-bottom:clamp(8px,1.3vmin,12px);text-align:center}
+.bag-panel .row{display:flex;flex-wrap:wrap;gap:clamp(6px,1.2vmin,12px);justify-content:center}
+.bag-panel .slot{width:clamp(46px,8vmin,70px);height:clamp(46px,8vmin,70px);border-radius:8px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(201,168,106,.42);display:flex;align-items:center;justify-content:center;
+  font-family:"Kaiti SC",serif;font-size:clamp(11px,1.7vmin,14px);color:#d8c391;text-align:center;line-height:1.4;padding:2px}
+.bag-panel .slot.empty{color:rgba(190,160,100,.35)}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+/* 日晷展开面板（全站统一） */
+.dial-full{position:absolute;inset:0;z-index:60;background:rgba(6,4,2,.8);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:2.2vmin}
+.dial-full.on{display:flex;animation:fadeIn .4s ease-out}
+.dial-full .big{width:clamp(220px,32vmin,340px);aspect-ratio:1;animation:dropIn .65s cubic-bezier(.2,1.4,.4,1) both}
+.dial-full .cap{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(19px,3vmin,30px);
+  color:#e9d9a8;letter-spacing:.3em;text-indent:.3em;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.dial-full .sub{font-size:clamp(11px,1.6vmin,15px);color:#b9a376;letter-spacing:.22em;text-indent:.22em;text-align:center;max-width:min(72vmin,560px)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes dropIn{from{opacity:0;transform:scale(.7) translateY(-24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+</style></head>
+<body>
+<div class="page">
+  <div class="stage" id="stage">
+    <div class="dial-btn"><svg viewBox="0 0 400 400" style="width:100%;height:100%">
+      <circle cx="200" cy="200" r="186" fill="#221a0e" stroke="rgba(168,184,142,.6)" stroke-width="3"/>
+      <circle cx="200" cy="200" r="174" fill="#54634f"/>
+      <circle cx="200" cy="200" r="156" fill="none" stroke="rgba(190,204,164,.28)" stroke-width="1.5" stroke-dasharray="3 7"/>
+      <text x="200" y="63" text-anchor="middle" font-size="23" fill="rgba(216,226,184,.9)" font-family="Kaiti SC,STKaiti,serif">酉</text>
+      <text x="200" y="120" text-anchor="middle" font-size="13" fill="rgba(240,222,175,.55)" font-family="Kaiti SC,STKaiti,serif">黄昏</text>
+      <line x1="200" y1="200" x2="374" y2="200" stroke="#d9c07e" stroke-width="7" stroke-linecap="round"/>
+      <line x1="200" y1="200" x2="26" y2="200" stroke="#4a3a22" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="200" cy="200" r="26" fill="#2b2415" stroke="rgba(255,240,205,.5)" stroke-width="2"/>
+      <circle cx="200" cy="200" r="5" fill="#d9c07e"/>
+    <path class="crack" d="M200 200 Q232 182 252 198 T284 214" fill="none" stroke="rgba(18,24,14,.6)" stroke-width="2.6" stroke-linecap="round"/>
+    </svg></div>
+
+    <!-- 日晷展开面板（全站统一：点击左上日晷展开） -->
+    <div class="dial-full" id="dialFull">
+      <div class="big"><svg viewBox="0 0 400 400" style="width:100%;height:100%">
+      <circle cx="200" cy="200" r="186" fill="#221a0e" stroke="rgba(168,184,142,.6)" stroke-width="3"/>
+      <circle cx="200" cy="200" r="174" fill="#54634f"/>
+      <circle cx="200" cy="200" r="156" fill="none" stroke="rgba(190,204,164,.28)" stroke-width="1.5" stroke-dasharray="3 7"/>
+      <text x="200" y="63" text-anchor="middle" font-size="23" fill="rgba(216,226,184,.9)" font-family="Kaiti SC,STKaiti,serif">酉</text>
+      <text x="200" y="120" text-anchor="middle" font-size="13" fill="rgba(240,222,175,.55)" font-family="Kaiti SC,STKaiti,serif">黄昏</text>
+      <line x1="200" y1="200" x2="374" y2="200" stroke="#d9c07e" stroke-width="7" stroke-linecap="round"/>
+      <line x1="200" y1="200" x2="26" y2="200" stroke="#4a3a22" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="200" cy="200" r="26" fill="#2b2415" stroke="rgba(255,240,205,.5)" stroke-width="2"/>
+      <circle cx="200" cy="200" r="5" fill="#d9c07e"/>
+    <path class="crack" d="M200 200 Q232 182 252 198 T284 214" fill="none" stroke="rgba(18,24,14,.6)" stroke-width="2.6" stroke-linecap="round"/>
+    </svg></div>
+      <span class="cap">酉时 · 日入</span>
+      <span class="sub">日光收尽，谜底还藏在字里行间。</span>
+    </div>
+
+
+    <div class="hint">
+      <span class="pre">第五幕 · 线上终局</span>
+      <h1>题7 · 关键词拼图</h1>
+      <span class="rule"></span>
+      <p class="sub">按你之前排好的顺序，把这些词放进句子里。</p>
+    </div>
+
+    <div class="puzzle">
+      <div class="slots" id="slots"></div>
+      <div class="words" id="words"></div>
+      <div class="tip" id="tip">六个词都放好了——读一遍试试。</div>
+    </div>
+
+    <div class="bag-tri" id="bagTri"><svg viewBox="0 0 60 52" style="width:100%;height:100%">
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="rgba(217,163,92,.88)"/>
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="none" stroke="#3a2813" stroke-width="2"/>
+      <path d="M16 34 h28" stroke="#3a2813" stroke-width="2.4" stroke-linecap="round"/>
+    </svg></div><div class="bag-panel" id="bagPanel"><div class="inner"><div class="bag-title">背包 · 外婆的旧物</div><div class="row"></div></div></div>
+
+    <!-- 照片演出：黑白 → 彩色 -->
+    <div class="photo-show" id="photoShow">
+      <div class="ph-tag">酉</div>
+      <div class="photo-frame">
+        <img class="ph-bw" src="assets/item-photo.png" alt="外婆的照片">
+        <img class="ph-color" src="assets/p15-photo-color.png" alt="">
+      </div>
+      <div class="ph-cap" id="phCap"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+var stage=document.getElementById('stage');
+setTimeout(function(){stage.classList.add('in');},60);
+
+var WORDS=['把','南京','读','给','更多人','听'];
+var ANSWER=['把','南京','读','给','更多人','听'];
+/* 词卡初始随机打乱（拼图玩法） */
+function shuffle(a){for(var k=a.length-1;k>0;k--){var r=Math.floor(Math.random()*(k+1));var t=a[k];a[k]=a[r];a[r]=t;}return a;}
+var CARD_ORDER=shuffle(WORDS.slice());
+if(CARD_ORDER.join('')===ANSWER.join(''))CARD_ORDER=shuffle(CARD_ORDER);
+var slotsEl=document.getElementById('slots');
+var wordsEl=document.getElementById('words');
+var tipEl=document.getElementById('tip');
+var slotVals=[];
+var filled=0, locked=false;
+
+/* 槽 */
+for(var i=0;i<6;i++){
+  var s=document.createElement('div');
+  s.className='slot';s.id='slot'+i;
+  s.addEventListener('click',function(){
+    if(locked)return;
+    if(this.classList.contains('filled')){
+      var w=this.textContent;
+      this.classList.remove('filled','glow');this.textContent='';
+      var card=document.querySelector('.word[data-w="'+w+'"]');
+      if(card)card.classList.remove('used');
+      filled--;
+      if(tipEl.classList.contains('on')&&filled<6)tipEl.classList.remove('on');
+    }
+  });
+  slotsEl.appendChild(s);
+  slotVals.push('');
+}
+/* 词卡（初始打乱排列） */
+CARD_ORDER.forEach(function(w){
+  var d=document.createElement('div');
+  d.className='word';d.dataset.w=w;d.textContent=w;
+  d.addEventListener('click',function(){
+    if(locked)return;
+    if(this.classList.contains('used'))return;
+    var si=slotVals.indexOf('');
+    if(si<0){toast('句子已经满了，点一下槽里的词可以收回。');return;}
+    var slot=document.getElementById('slot'+si);
+    slot.textContent=w;slot.classList.add('filled','glow');
+    slotVals[si]=w;this.classList.add('used');filled++;
+    if(filled===6){
+      tipEl.classList.add('on');
+      var ok=slotVals.every(function(v,i){return v===ANSWER[i];});
+      if(ok){
+        setTimeout(win,600);
+      }else{
+        setTimeout(function(){tipEl.textContent='再读读三章里圈出来的词——顺序好像不对。';},350);
+        setTimeout(function(){reset();},1800);
+      }
+    }
+  });
+  wordsEl.appendChild(d);
+});
+function reset(){
+  if(locked)return;
+  for(var i=0;i<6;i++){
+    var s=document.getElementById('slot'+i);
+    if(s.classList.contains('filled')){
+      var w=s.textContent;
+      var card=document.querySelector('.word[data-w="'+w+'"]');
+      if(card)card.classList.remove('used');
+      s.classList.remove('filled','glow');s.textContent='';
+    }
+  }
+  slotVals=['','','','','',''];filled=0;
+  tipEl.classList.remove('on');
+  tipEl.textContent='六个词都放好了——读一遍试试。';
+}
+
+/* 打字机环境音 */
+var actx=(window.AudioContext||window.webkitAudioContext)?new (window.AudioContext||window.webkitAudioContext)():null;
+function resumeAudio(){if(actx&&actx.state==='suspended')actx.resume();}
+var typeTimer=null;
+function keyTap(){
+  if(window.__sfx)window.__sfx.key();
+}
+function startTypeSound(){
+  resumeAudio();
+  typeTimer=setInterval(function(){
+    if(Math.random()<.8)keyTap();
+  },260);
+}
+function stopTypeSound(){if(typeTimer){clearInterval(typeTimer);typeTimer=null;}}
+
+function toast(msg){
+  var t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:absolute;z-index:60;left:50%;top:14%;transform:translateX(-50%);'+
+    'background:rgba(30,21,10,.92);border:1px solid rgba(217,163,92,.6);border-radius:3px;'+
+    'padding:.6em 1.4em;font-size:clamp(12px,1.8vmin,17px);color:#f2e7cf;letter-spacing:.1em;'+
+    'opacity:0;transition:opacity .4s;box-shadow:0 8px 20px rgba(0,0,0,.5)';
+  stage.appendChild(t);
+  requestAnimationFrame(function(){t.style.opacity=1;});
+  setTimeout(function(){t.style.opacity=0;setTimeout(function(){t.remove();},450);},2200);
+}
+
+/* 照片上色演出 */
+var photo=document.getElementById('photoShow');
+var phCap=document.getElementById('phCap');
+function typeCap(text,cb){
+  var i=0;
+  (function step(){
+    if(i<=text.length){
+      phCap.textContent=text.slice(0,i);
+      i++;
+      if(i<=text.length&&typeTimer)keyTap();
+      setTimeout(step,72+Math.random()*60);
+    }else if(cb){cb();}
+  })();
+}
+function win(){
+  locked=true;
+  stopTypeSound();
+  document.querySelectorAll('.word').forEach(function(w){w.style.opacity=.3;w.style.pointerEvents='none';});
+  /* 照片从背包位置浮起 */
+  photo.classList.add('on');
+  setTimeout(function(){photo.classList.add('coloring');},1150);
+  setTimeout(function(){
+    stopTypeSound();startTypeSound();
+    typeCap('这本书，本来是想给他的。现在，给你。',function(){stopTypeSound();});
+  },3600);
+  setTimeout(function(){
+    document.getElementById('stage').classList.add('fade-out');
+    setTimeout(function(){window.location.href='第五幕-出门地图.html';},600);
+  },9200);
+}
+
+startTypeSound();
+document.addEventListener('click',function(){resumeAudio();},{once:true});
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script>
+<script>
+(function(){
+var tri=document.getElementById('bagTri');if(!tri)return;
+var panel=document.getElementById('bagPanel');if(!panel)return;
+tri.addEventListener('click',function(e){e.stopPropagation();panel.classList.toggle('on');});
+var items=['关键词字条'];
+var row=panel.querySelector('.row');
+items.forEach(function(nm){
+  var d=document.createElement('div');d.className='slot';d.textContent=nm;row.appendChild(d);
+});
+document.addEventListener('click',function(e){
+  if(!panel.classList.contains('on'))return;
+  if(!panel.contains(e.target)&&!tri.contains(e.target))panel.classList.remove('on');
+});
+})();
+(function(){
+var b=document.querySelector('.dial-btn'),f=document.getElementById('dialFull');
+if(!b||!f)return;
+b.addEventListener('click',function(e){e.stopPropagation();f.classList.add('on');});
+f.addEventListener('click',function(e){if(!e.target.closest('.big'))f.classList.remove('on');});
+})();
+</script>
+
+</body>
+</html>

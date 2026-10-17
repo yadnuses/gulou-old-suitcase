@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>外婆的旧皮箱 · 入口</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;min-height:100vh;
+  background:radial-gradient(130% 100% at 50% 0%,#2a231b 0%,#191309 55%,#0a0703 100%);
+  color:#f2e7cf;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:920px;margin:0 auto;padding:clamp(28px,6vmin,72px) clamp(18px,4vmin,40px) 48px;text-align:center}
+
+/* 顶部徽记 */
+.badge{display:inline-flex;align-items:center;gap:10px;letter-spacing:.34em;font-size:clamp(11px,1.6vmin,15px);
+  color:#c9a86a;border:1px solid rgba(201,168,106,.4);border-radius:2px;padding:7px 16px;margin-bottom:26px}
+h1{font-family:"Ma Shan Zheng","Kaiti SC",serif;font-weight:400;
+  font-size:clamp(38px,9vmin,84px);color:#f0e3c4;letter-spacing:.06em;text-shadow:0 3px 18px rgba(0,0,0,.7)}
+.sub{margin-top:12px;font-size:clamp(13px,2vmin,19px);color:#cbb98a;letter-spacing:.28em}
+.sub em{font-style:normal;color:#e0b264}
+
+/* 开始按钮 */
+.start{display:inline-flex;align-items:center;gap:10px;margin:34px 0 8px;padding:15px 42px;
+  background:linear-gradient(180deg,#7c6134,#5a4422 68%,#46341a);
+  border:1px solid rgba(240,200,130,.55);border-radius:3px;color:#f6ecd0;text-decoration:none;
+  font-size:clamp(17px,2.6vmin,23px);letter-spacing:.24em;cursor:pointer;
+  box-shadow:0 8px 22px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.06);
+  transition:transform .18s,box-shadow .18s,filter .18s}
+.start:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 12px 28px rgba(0,0,0,.6)}
+.start .arr{transition:transform .25s}
+.start:hover .arr{transform:translateX(4px)}
+.start-note{margin-top:10px;font-size:clamp(11px,1.6vmin,14px);color:#8f7f5f;letter-spacing:.2em}
+
+.divider{display:flex;align-items:center;gap:14px;margin:46px 0 22px}
+.divider:before,.divider:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#c9a86a 55%,transparent)}
+.divider span{font-size:clamp(12px,1.8vmin,16px);color:#c9a86a;letter-spacing:.4em}
+
+/* 章节列表 */
+.chapters{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}
+.ch{display:flex;align-items:center;gap:13px;padding:12px 16px;border-radius:3px;text-decoration:none;
+  background:rgba(38,27,12,.5);border:1px solid rgba(201,168,106,.28);color:#e8dcc0;
+  transition:background .2s,border-color .2s,transform .15s}
+.ch:hover{background:rgba(74,52,22,.7);border-color:rgba(240,200,130,.7);transform:translateX(3px)}
+.ch .no{flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:1px solid rgba(217,163,92,.6);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:#e0b264;font-weight:700}
+.ch .t{font-size:clamp(13px,1.9vmin,17px);letter-spacing:.06em;line-height:1.5}
+.ch .t small{display:block;font-size:clamp(10px,1.4vmin,12px);color:#9a8a64;letter-spacing:.14em;margin-top:2px}
+.ch .go{margin-left:auto;color:#c9a86a;opacity:.7;font-size:15px}
+
+footer{margin-top:44px;font-size:clamp(11px,1.5vmin,13px);color:#7d6f52;letter-spacing:.18em;line-height:2}
+
+@media (max-width:640px){.chapters{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">南京 · 1949 · 未寄出的京话</div>
+  <h1>外婆的旧皮箱</h1>
+  <p class="sub">—— 一 个 解 开 尘 封 京 话 的 网 页 解 谜 游 戏 ——</p>
+
+  <a class="start" href="京话.html"><span class="arr">▶</span> 开始游戏</a>
+  <p class="start-note">从封面进入，按故事顺序一路解谜；也可以从下方任意章节开始。手机建议横屏，桌面浏览器体验更完整。</p>
+
+  <div class="divider"><span>章 节 导 航</span></div>
+
+  <div class="chapters" id="chs"></div>
+
+  <footer>
+    建议按编号顺序游玩 · 全部为本地页面，无需联网<br>
+    保持本文件与 assets 文件夹在同一目录
+  </footer>
+</div>
+
+<script>
+(function(){
+var CH=[
+  ["京话.html","封面 · 未寄出的京话","序 · 封面"],
+  ["外婆的旧皮箱.html","第1页 · 火车窗 · 开箱","序 · 开箱"],
+  ["序章-开箱.html","第2页 · 满箱收集","序 · 收集"],
+  ["序章-明信片.html","第3页 · 五张明信片","序 · 明信片"],
+  ["第一幕-读信.html","第4页 · 床头读信（姚颖是谁）","第一幕 · 读信"],
+  ["第一幕-题1-摩斯码.html","第5页 · 题1 · 三张旧明信片摩斯码","第一幕 · 摩斯码"],
+  ["第二幕-编辑退稿信.html","第6页 · 编辑退稿信","第二幕 · 退稿信"],
+  ["第二幕-题2-颐和路选楼.html","第7页 · 题2 · 颐和路选楼","第二幕 · 选楼"],
+  ["第二幕-题3-打字机密码.html","第8页 · 题3 · 打字机密码","第二幕 · 打字机"],
+  ["第三幕-回忆杀.html","第9页 · 回忆杀","第三幕 · 回忆杀"],
+  ["第三幕-题4-遗物排序.html","第10页 · 题4 · 遗物排序","第三幕 · 遗物排序"],
+  ["第三幕-题5-27页信纸.html","第11页 · 题5 · 27页信纸","第三幕 · 27页信纸"],
+  ["第三幕末-钥匙钩子.html","第12页 · 钥匙钩子","第三幕末 · 钥匙"],
+  ["第四幕-题6-起雾的1月.html","第13页 · 题6 · 起雾的1月","第四幕 · 起雾"],
+  ["第五幕-翻京话三章.html","第14页 · 翻京话三章","第五幕 · 翻书"],
+  ["第三幕-题7-关键词拼图.html","第15页 · 题7 · 关键词拼图","终局 · 拼图"],
+  ["第五幕-出门地图.html","第16页 · 线上终章 · 出门地图","终章 · 出门"],
+  ["第五幕-今昔对比.html","第17页 · 今昔对比","终章 · 今昔"]
+];
+var box=document.getElementById('chs');
+CH.forEach(function(c,i){
+  var a=document.createElement('a');
+  a.className='ch';a.href=c[0];
+  var no=document.createElement('span');no.className='no';no.textContent=i+1;
+  var t=document.createElement('span');t.className='t';
+  t.innerHTML=c[1]+'<small>'+c[2]+'</small>';
+  var go=document.createElement('span');go.className='go';go.textContent='›';
+  a.appendChild(no);a.appendChild(t);a.appendChild(go);
+  box.appendChild(a);
+});
+})();
+</script>
+</body>
+</html>

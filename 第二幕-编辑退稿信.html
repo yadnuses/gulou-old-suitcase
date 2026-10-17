@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二幕 · 编辑退稿信</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:#0a0805;color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:radial-gradient(120% 100% at 50% 8%,#2e2620 0%,#18130e 55%,#0a0805 100%);
+  box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;
+  animation:stageIn .7s ease-out both}
+@keyframes stageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.bg{position:absolute;inset:0;background:url(assets/p6-window.png) center/cover no-repeat}
+.vig{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(180deg,rgba(16,11,6,.42) 0%,rgba(16,11,6,.12) 30%,rgba(16,11,6,.08) 55%,rgba(12,8,4,.46) 100%),
+  radial-gradient(120% 120% at 50% 40%,transparent 55%,rgba(10,7,3,.5) 100%)}
+.rain{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.rain i{position:absolute;display:block;width:1px;height:clamp(24px,5vmin,56px);
+  background:linear-gradient(180deg,rgba(200,215,225,0),rgba(200,215,225,.32));opacity:0;
+  animation:rainfall linear infinite}
+@keyframes rainfall{0%{transform:translateY(-12vh)}100%{transform:translateY(112vh)}}
+/* ============ 左上日晷 ============ */
+.dial-btn{position:absolute;z-index:20;left:2vmin;top:2vmin;width:clamp(54px,8.4vmin,88px);
+  aspect-ratio:1;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));
+  transition:transform .25s ease,filter .4s}
+.dial-btn:hover{transform:scale(1.06) rotate(6deg);filter:drop-shadow(0 8px 16px rgba(0,0,0,.6))}
+.dial-btn svg{width:100%;height:100%}
+.dial-full{position:absolute;inset:0;z-index:60;background:rgba(6,4,2,.78);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:2.6vmin}
+.dial-full.on{display:flex;animation:fadeIn .4s ease-out}
+.dial-full .big{width:clamp(230px,34vmin,360px);aspect-ratio:1;animation:dropIn .65s cubic-bezier(.2,1.4,.4,1) both}
+.dial-full .cap{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(19px,3vmin,30px);
+  color:#e9d9a8;letter-spacing:.3em;text-indent:.3em;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.dial-full .sub{font-size:clamp(11px,1.6vmin,15px);color:#b9a376;letter-spacing:.22em;text-indent:.22em}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes dropIn{from{opacity:0;transform:scale(.7) translateY(-24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+/* ============ 两封信 ============ */
+.mail{position:absolute;z-index:10;width:clamp(180px,22.5vmin,340px);
+  aspect-ratio:5/7;cursor:pointer;transition:transform .3s ease;filter:drop-shadow(0 14px 26px rgba(0,0,0,.45))}
+.mail:hover{transform:scale(1.04) rotate(-.4deg)}
+.mail.fl{left:calc(50% - clamp(150px,22.5vmin,340px) - clamp(5px,0.9vmin,12px));top:clamp(30px,9vmin,120px);rotate:-2.2deg}
+.mail.fr{right:calc(50% - clamp(150px,22.5vmin,340px) - clamp(5px,0.9vmin,12px));top:clamp(30px,9vmin,120px);rotate:2.4deg}
+.mail.fl.off,.mail.fr.off{animation:mailFloat 3.6s ease-in-out infinite alternate}
+.mail.fl.off{animation-delay:-1.2s}
+@keyframes mailFloat{from{transform:translateY(0) rotate(-2.2deg)}to{transform:translateY(-1.6vmin) rotate(-2.6deg)}}
+.mail.fr.off{animation-delay:-2.1s}
+@keyframes mailFloatR{from{transform:translateY(0) rotate(2.4deg)}to{transform:translateY(-1.6vmin) rotate(2deg)}}
+.mail.off .paper{animation:inherit}
+.paper{position:relative;width:100%;height:100%;border-radius:4px;
+  background:linear-gradient(158deg,#f6efda 0%,#ecdfbd 52%,#dcc79e 100%);
+  border:1px solid rgba(120,95,55,.5);
+  box-shadow:inset 0 0 42px rgba(158,124,70,.26),inset -2px -3px 18px rgba(140,110,60,.2),
+    0 0 0 1px rgba(255,250,225,.35),0 16px 34px rgba(0,0,0,.42);
+  overflow:hidden}
+.paper::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(105deg,rgba(120,95,55,0) 46%,rgba(120,95,55,.12) 50%,rgba(120,95,55,0) 54%),
+  linear-gradient(175deg,rgba(160,130,80,.1) 0%,rgba(160,130,80,0) 38%)}
+.paper::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:repeating-linear-gradient(transparent 0 clamp(14px,2.6vmin,26px),rgba(138,105,60,.16) clamp(14px,2.6vmin,26px) calc(clamp(14px,2.6vmin,26px) + 1px));
+  opacity:.6;mask-image:linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 16%,#000 100%)}
+.paper .edges{position:absolute;inset:0;pointer-events:none;border-radius:4px;
+  box-shadow:inset 0 0 0 6px rgba(232,214,168,.25),inset 0 0 0 7px rgba(150,115,60,.12)}
+.mail .stamp{position:absolute;z-index:3;left:clamp(2px,.4vmin,6px);bottom:clamp(2px,.4vmin,6px);top:auto;right:auto;
+  width:clamp(26px,3.8vmin,48px);aspect-ratio:1;rotate:4deg;opacity:.92;
+  background:radial-gradient(circle,rgba(172,38,30,.14) 30%,rgba(172,38,30,0) 71%);
+  border-radius:50%;display:flex;align-items:center;justify-content:center}
+.mail .stamp svg{width:100%;height:100%}
+/* 放大信纸印章（左下角小章） */
+.reader .mail-big .stamp{position:absolute;z-index:3;left:clamp(4px,.8vmin,10px);bottom:clamp(4px,.8vmin,10px);top:auto;right:auto;
+  width:clamp(30px,4.4vmin,54px);aspect-ratio:1;rotate:4deg;opacity:.92;
+  background:radial-gradient(circle,rgba(172,38,30,.14) 30%,rgba(172,38,30,0) 71%);
+  border-radius:50%;display:flex;align-items:center;justify-content:center}
+.reader .mail-big .stamp svg{width:100%;height:100%}
+.mail .body{position:absolute;z-index:2;inset:0;display:flex;flex-direction:column;
+  padding:clamp(12px,2.6vmin,30px);font-family:"Ma Shan Zheng","Kaiti SC",cursive}
+.mail .line-t{font-size:clamp(10px,1.5vmin,15px);color:#8d7a50;letter-spacing:.2em;text-align:center;margin-bottom:auto}
+.mail .core{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:clamp(15px,2.6vmin,30px);color:#5b4324;line-height:1.9;letter-spacing:.1em}
+.mail .line-b{font-size:clamp(10px,1.5vmin,15px);color:#8d7a50;letter-spacing:.2em;text-align:right;margin-top:auto}
+.mail .blank{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:clamp(11px,1.7vmin,16px);color:rgba(120,96,55,.42);letter-spacing:.4em;text-indent:.4em}
+/* 放大信纸正文（竖排） */
+.reader .mail-big{width:clamp(300px,44vmin,600px)}
+.body-v{position:absolute;z-index:2;inset:0;writing-mode:vertical-rl;text-orientation:upright;
+  font-family:"Kaiti SC","STKaiti","Ma Shan Zheng",serif;color:#5b4324;
+  padding:clamp(12px,2.4vmin,28px);font-size:clamp(12px,1.7vmin,17px);line-height:1.62;letter-spacing:.08em}
+.body-v .v-title{writing-mode:horizontal-tb;text-align:center;font-size:clamp(11px,1.7vmin,16px);
+  color:#8d7a50;letter-spacing:.28em;margin-bottom:clamp(8px,1.5vmin,18px)}
+.body-v p{margin:0;text-indent:2em}
+.body-v p.gap{height:clamp(10px,1.6vmin,20px);text-indent:0}
+.body-v .v-sig{text-indent:0;margin-left:clamp(14px,2.6vmin,34px)}
+/* 放大阅读 */
+.reader{position:absolute;inset:0;z-index:50;background:rgba(5,3,1,.72);backdrop-filter:blur(2px);
+  display:none;align-items:center;justify-content:center}
+.reader.on{display:flex;animation:fadeIn .35s ease-out}
+.reader .mail-big{position:relative;width:clamp(340px,46vmin,600px);aspect-ratio:5/7;cursor:pointer;
+  filter:drop-shadow(0 24px 60px rgba(0,0,0,.7));animation:mailBig .6s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes mailBig{from{opacity:0;transform:scale(.5) rotate(2deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.reader .close{position:absolute;right:8%;top:8%;z-index:5;width:clamp(34px,5vmin,52px);height:clamp(34px,5vmin,52px);
+  border-radius:50%;border:1px solid rgba(201,168,106,.55);background:rgba(20,14,7,.55);color:#dcc98f;
+  font-size:clamp(15px,2.4vmin,24px);line-height:1;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .2s,background .3s}
+.reader .close:hover{transform:scale(1.12);background:rgba(46,32,15,.75)}
+/* 姚颖回信 */
+.reply{position:absolute;z-index:12;left:50%;bottom:clamp(44px,8.2vmin,110px);
+  transform:translateX(-50%);opacity:0;pointer-events:none;text-align:center;
+  transition:opacity .9s ease .2s}
+.reply.on{opacity:1;pointer-events:auto}
+.reply .qu{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(20px,3.6vmin,42px);
+  color:#f1e0b0;letter-spacing:.16em;text-indent:.16em;
+  text-shadow:0 2px 14px rgba(0,0,0,.85),0 0 26px rgba(217,163,92,.28)}
+.reply .cap{display:block;margin-top:clamp(4px,1vmin,10px);font-size:clamp(10px,1.6vmin,15px);
+  color:#bda876;letter-spacing:.3em;text-indent:.3em;opacity:.82}
+/* 题2入口 */
+.next-puzzle{position:absolute;z-index:14;left:50%;bottom:clamp(118px,20vmin,240px);
+  transform:translateX(-50%);opacity:0;pointer-events:none;transition:opacity .8s ease .35s;
+  display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1.2vmin,12px)}
+.next-puzzle.on{opacity:1;pointer-events:auto}
+.next-puzzle .hint{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(14px,2.4vmin,26px);
+  color:#e6cf98;letter-spacing:.2em;text-indent:.2em;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.next-puzzle .go{font-family:"Noto Serif SC",serif;font-size:clamp(13px,2vmin,20px);color:#3a2813;
+  background:linear-gradient(160deg,#e8c98c,#cf9f55);border:1px solid #a87934;
+  border-radius:999px;padding:.5em 1.6em .55em;cursor:pointer;letter-spacing:.26em;text-indent:.26em;
+  box-shadow:0 8px 22px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,240,200,.7);
+  transition:transform .2s,box-shadow .3s;animation:goPulse 2.2s ease-in-out infinite}
+.next-puzzle .go:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 12px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,240,200,.7)}
+@keyframes goPulse{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 0 rgba(217,163,92,.45)}
+  50%{box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 12px rgba(217,163,92,0)}}
+/* ============ 底部背包 ============ */
+.bag-tri{position:absolute;z-index:30;left:50%;bottom:clamp(4px,1vmin,12px);transform:translateX(-50%);
+  width:clamp(26px,4.2vmin,44px);height:clamp(26px,4.2vmin,44px);cursor:pointer;
+  display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55));
+  transition:transform .2s}
+.bag-tri:hover{transform:translateX(-50%) scale(1.14)}
+.bag-panel{position:absolute;z-index:40;left:50%;bottom:clamp(30px,6.4vmin,74px);transform:translateX(-50%) translateY(10px);
+  width:clamp(330px,58vmin,620px);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+.bag-panel.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.bag-panel .inner{position:relative;background:linear-gradient(160deg,#2a2015,#1a120a 70%);
+  border:1px solid rgba(201,168,106,.38);border-radius:10px;padding:clamp(8px,1.5vmin,14px);
+  box-shadow:0 18px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,240,200,.08)}
+.bag-panel .inner::before{content:"";position:absolute;inset:0;border-radius:10px;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 5px)}
+.bag-panel .row{display:flex;gap:clamp(6px,1.2vmin,12px);justify-content:center}
+.slot{position:relative;width:clamp(42px,7.6vmin,72px);aspect-ratio:1;border-radius:8px;
+  border:1px dashed rgba(201,168,106,.4);background:rgba(255,246,220,.04);
+  display:flex;align-items:center;justify-content:center;font-size:clamp(11px,1.7vmin,15px);
+  color:rgba(201,168,106,.5);letter-spacing:.12em}
+.slot.lit{border-style:solid;border-color:rgba(217,163,92,.75);background:rgba(217,163,92,.12);
+  box-shadow:0 0 14px rgba(217,163,92,.3) inset,0 0 8px rgba(217,163,92,.18);color:#e6cf98}
+.slot .nm{position:absolute;bottom:-1.1em;left:50%;transform:translateX(-50%);
+  font-size:clamp(9px,1.3vmin,12px);color:#a08c60;letter-spacing:.08em;white-space:nowrap}
+/* toast */
+.toast{position:absolute;z-index:80;left:50%;top:26%;transform:translateX(-50%);
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(15px,2.6vmin,26px);color:#e9d9a8;
+  letter-spacing:.2em;text-indent:.2em;background:rgba(20,14,7,.72);border:1px solid rgba(201,168,106,.4);
+  padding:.6em 1.4em;border-radius:999px;opacity:0;pointer-events:none;
+  box-shadow:0 10px 28px rgba(0,0,0,.5);transition:opacity .3s}
+.toast.show{opacity:1}
+/* 通用 */
+.hidden{display:none!important}
+@media (prefers-reduced-motion:reduce){
+  .mail.fl.off,.mail.fr.off,.rain i,.next-puzzle .go{animation:none!important}
+  .stage{animation:none}
+}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page" id="page">
+  <div class="stage" id="stage">
+    <div class="bg"></div>
+    <div class="vig"></div>
+    <div class="rain" id="rain"></div>
+
+    <!-- 左上日晷（辰时） -->
+    <div class="dial-btn" id="dialBtn" title=""></div>
+
+    <!-- 两封信 -->
+    <div class="mail fl off" id="mailRej" data-read="0">
+      <div class="paper">
+        <div class="edges"></div>
+        <div class="stamp"><svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(172,38,30,.85)" stroke-width="5"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(172,38,30,.6)" stroke-width="2"/>
+          <text x="50" y="62" text-anchor="middle" font-size="26" fill="rgba(172,38,30,.88)"
+            font-family="Kaiti SC,STKaiti,serif" font-weight="700" letter-spacing="4">退回</text>
+        </svg></div>
+        <div class="body">
+          <div class="line-t">《论语》编辑部 · 来函</div>
+          <div class="core">题材细碎，无关时局。</div>
+          <div class="line-b">退回 · 原稿奉还</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mail fr off" id="mailAcc" data-read="0">
+      <div class="paper">
+        <div class="edges"></div>
+        <div class="stamp"><svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(160,36,28,.55)" stroke-width="5"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(160,36,28,.38)" stroke-width="2"/>
+        </svg></div>
+        <div class="body">
+          <div class="line-t">《论语》编辑部 · 来函</div>
+          <div class="blank"></div>
+          <div class="line-b">盼复</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 放大阅读 -->
+    <div class="reader" id="reader">
+      <div class="mail-big" id="mailBig"></div>
+      <div class="close" id="readerClose">×</div>
+    </div>
+
+    <!-- 姚颖回信 -->
+    <div class="reply" id="reply">
+      <span class="qu" id="replyQu"></span>
+      <span class="cap">姚颖 · 回信</span>
+    </div>
+
+    <!-- 题2入口 -->
+    <div class="next-puzzle" id="nextPuzzle">
+      <span class="hint">她把专栏留了下来</span>
+      <button class="go" id="goPuzzle">翻开下一页</button>
+    </div>
+
+    <!-- 底部三角背包 -->
+    <div class="bag-tri" id="bagTri"><svg viewBox="0 0 60 52" aria-hidden="true" style="width:100%;height:100%">
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="rgba(217,163,92,.88)"/>
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="none" stroke="#3a2813" stroke-width="2"/>
+      <path d="M16 34 h28" stroke="#3a2813" stroke-width="2.4" stroke-linecap="round"/>
+    </svg></div>
+    <div class="bag-panel" id="bagPanel">
+      <div class="inner"><div class="row" id="bagSlots"></div></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 全屏日晷 -->
+    <div class="dial-full" id="dialFull">
+      <div class="big" id="dialBig"></div>
+      <span class="cap">辰时 · 上午</span>
+      <span class="sub">民国三十八年 · 一九四九年春</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var curHour=3; /* 辰时 */
+var readRej=false,readAcc=false;
+var $=function(s){return document.querySelector(s)};
+
+/* ---------- 雨 ---------- */
+(function(){
+  var rain=$('#rain');var n=Math.min(46,Math.floor(innerWidth/26));
+  for(var i=0;i<n;i++){
+    var d=document.createElement('i');
+    d.style.left=(Math.random()*100)+'%';
+    d.style.opacity=(0.25+Math.random()*0.5).toFixed(2);
+    d.style.animationDuration=(1.6+Math.random()*2.4).toFixed(2)+'s';
+    d.style.animationDelay=(Math.random()*2.4).toFixed(2)+'s';
+    rain.appendChild(d);
+  }
+})();
+
+/* ---------- 日晷 ---------- */
+function dialSVG(hour,size){
+
+
+  var HN=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  var s='<svg viewBox="0 0 400 400">'
+  +'<defs><radialGradient id="brz" cx="38%" cy="32%" r="78%"><stop offset="0%" stop-color="#7c8b74"/><stop offset="45%" stop-color="#54634f"/><stop offset="78%" stop-color="#33422e"/><stop offset="100%" stop-color="#24301f"/></radialGradient>'
+  +'<radialGradient id="rim" cx="45%" cy="38%" r="80%"><stop offset="0%" stop-color="#8a7a54"/><stop offset="60%" stop-color="#5d4e34"/><stop offset="100%" stop-color="#382d1c"/></radialGradient>'
+  +'<radialGradient id="pat" cx="42%" cy="36%" r="70%"><stop offset="0%" stop-color="rgba(126,168,132,.42)"/><stop offset="55%" stop-color="rgba(96,134,105,.18)"/><stop offset="100%" stop-color="rgba(96,134,105,0)"/></radialGradient></defs>'
+  +'<circle cx="200" cy="200" r="194" fill="#221c12" stroke="rgba(0,0,0,.5)" stroke-width="2"/>'
+  +'<circle cx="200" cy="200" r="184" fill="url(#rim)"/>'
+  +'<circle cx="200" cy="200" r="168" fill="url(#brz)"/>'
+  +'<circle cx="200" cy="200" r="168" fill="url(#pat)" opacity=".5"/>'
+  +'<circle cx="200" cy="200" r="150" fill="none" stroke="rgba(180,196,152,.4)" stroke-width="2"/>'
+  +'<circle cx="200" cy="200" r="132" fill="none" stroke="rgba(180,196,152,.22)" stroke-width="1.5" stroke-dasharray="2 6"/>';
+  for(var i=0;i<12;i++){
+    var a=i*30*Math.PI/180;
+    s+='<line x1="'+(200+Math.sin(a)*180).toFixed(1)+'" y1="'+(200-Math.cos(a)*180).toFixed(1)+'" x2="'+(200+Math.sin(a)*168).toFixed(1)+'" y2="'+(200-Math.cos(a)*168).toFixed(1)+'" stroke="rgba(176,196,150,.55)" stroke-width="2.2"/>';
+    s+='<text x="'+(200+Math.sin(a)*142).toFixed(1)+'" y="'+(200-Math.cos(a)*142+10).toFixed(1)+'" text-anchor="middle" font-size="24" fill="rgba(216,226,184,.9)" font-family="Kaiti SC,STKaiti,serif">'+HN[i]+'</text>';
+  }
+  var ha=hour*30*Math.PI/180;
+  s+='<path d="M200 200 Q232 182 252 198 T284 214" fill="none" stroke="rgba(18,24,14,.6)" stroke-width="2.6" stroke-linecap="round"/>'
+  +'<path d="M200 200 L212 190 L206 178" fill="none" stroke="rgba(18,24,14,.45)" stroke-width="1.6" stroke-linecap="round"/>'
+  +'<line x1="200" y1="200" x2="'+(200+Math.sin(ha)*96).toFixed(1)+'" y2="'+(200-Math.cos(ha)*96).toFixed(1)+'" stroke="#d9c07e" stroke-width="6" stroke-linecap="round"/>'
+  +'<line x1="200" y1="200" x2="'+(200+Math.sin(ha)*96).toFixed(1)+'" y2="'+(200-Math.cos(ha)*96).toFixed(1)+'" stroke="#8a6a35" stroke-width="2.4" stroke-linecap="round"/>'
+  +'<path d="M'+(200+Math.sin(ha+Math.PI/2)*38).toFixed(1)+' '+(200-Math.cos(ha+Math.PI/2)*38).toFixed(1)+' L'+(200+Math.sin(ha)*74).toFixed(1)+' '+(200-Math.cos(ha)*74).toFixed(1)+' L'+(200+Math.sin(ha-Math.PI/2)*38).toFixed(1)+' '+(200-Math.cos(ha-Math.PI/2)*38).toFixed(1)+'" fill="none" stroke="#d9c07e" stroke-width="3.2" stroke-linecap="round"/>'
+  +'<circle cx="200" cy="200" r="24" fill="#2b2415" stroke="rgba(200,178,120,.55)" stroke-width="2.5"/>'
+  +'<circle cx="200" cy="200" r="7" fill="#d9c07e"/></svg>';
+  return s;
+}
+$('#dialBtn').innerHTML=dialSVG(curHour);
+var dialFull=$('#dialFull');
+$('#dialBtn').addEventListener('click',function(e){e.stopPropagation();$('#dialBig').innerHTML=dialSVG(curHour);dialFull.classList.add('on');});
+dialFull.addEventListener('click',function(){dialFull.classList.remove('on');});
+
+/* ---------- 信纸放大 ---------- */
+var reader=$('#reader'),mailBig=$('#mailBig');
+var mailDefs={
+  rej:'<div class="paper"><div class="edges"></div>'
+    +'<div class="stamp"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(172,38,30,.85)" stroke-width="5"/><circle cx="50" cy="50" r="38" fill="none" stroke="rgba(172,38,30,.6)" stroke-width="2"/><text x="50" y="62" text-anchor="middle" font-size="26" fill="rgba(172,38,30,.88)" font-family="Kaiti SC,STKaiti,serif" font-weight="700" letter-spacing="4">退回</text></svg></div>'
+    +'<div class="body-v"><div class="v-title">《论语》编辑部 · 来函</div>'
+    +'<p>姚颖女士台鉴：</p><p class="gap"></p><p>来稿已阅毕。</p><p class="gap"></p>'
+    +'<p>时局动荡，举国皆有慷慨悲歌之文。尊稿通篇只写市井细碎：鼓楼糖粥、街边梧桐、巷口雨声，不见家国大义。您写的南京太碎了，不够时局。</p><p class="gap"></p>'
+    +'<p>本刊当下选文，当以针砭时事为重。此篇暂不宜刊发，原稿随信寄回，望君另择题材，再赐佳作。</p><p class="gap"></p>'
+    +'<p>顺颂文祺</p><p class="v-sig">《论语》编辑部 启</p>'
+    +'</div>'
+    +'<div class="line-b" style="position:absolute;left:auto;right:clamp(10px,2vmin,26px);bottom:clamp(10px,2vmin,26px);z-index:3;writing-mode:horizontal-tb;color:rgba(138,36,30,.85);font-size:clamp(11px,1.7vmin,16px);letter-spacing:.4em;text-indent:.4em">退回 · 原稿奉还</div></div>',
+  acc:'<div class="paper"><div class="edges"></div>'
+    +'<div class="stamp"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(160,36,28,.5)" stroke-width="5"/><circle cx="50" cy="50" r="38" fill="none" stroke="rgba(160,36,28,.32)" stroke-width="2"/></svg></div>'
+    +'<div class="body-v"><div class="v-title">《论语》编辑部 · 来函</div>'
+    +'<p>姚颖女士台鉴：</p><p class="gap"></p>'
+    +'<p>前番退回尊稿，编辑部同人反复重读，竟慢慢读出南京城藏在烟火里的风骨。</p><p class="gap"></p>'
+    +'<p>世间文章，不止有烽火呐喊。一城人的日常、街巷里的言语，亦是时代的注脚。编辑部商议决定，邀您开设固定专栏，定名《京话》。不必刻意追随时局，就写您眼中南京的一草一木、一言一语。</p><p class="gap"></p>'
+    +'<p>稿件按月寄来，稿酬按期结算。期待你的文字。</p><p class="gap"></p>'
+    +'<p>顺颂文祺</p><p class="v-sig">《论语》编辑部 启</p>'
+    +'</div></div>'
+};
+function openMail(kind){
+  mailBig.innerHTML=mailDefs[kind];
+  reader.classList.add('on');
+  if(kind==='rej'){readRej=true;$('#mailRej').dataset.read=1;}
+  if(kind==='acc'){readAcc=true;$('#mailAcc').dataset.read=1;}
+  checkBoth();
+}
+$('#mailRej').addEventListener('click',function(){openMail('rej');});
+$('#mailAcc').addEventListener('click',function(){openMail('acc');});
+$('#readerClose').addEventListener('click',function(){reader.classList.remove('on');});
+reader.addEventListener('click',function(e){
+  if(e.target===reader||e.target.classList&&e.target.classList.contains('close'))reader.classList.remove('on');
+});
+mailBig.addEventListener('click',function(){reader.classList.remove('on');});
+
+/* ---------- 姚颖回信（打字机） ---------- */
+var quText='南京本来就是碎的。';
+function typeReply(){
+  var qu=$('#replyQu');qu.textContent='';$('#reply').classList.add('on');
+  var i=0;
+  var t=setInterval(function(){
+    qu.textContent=quText.slice(0,++i);
+    if(i>=quText.length)clearInterval(t);
+  },140);
+}
+
+/* ---------- 读完两封 → 回信 + 题2 ---------- */
+function checkBoth(){
+  if(readRej&&readAcc){
+    setTimeout(typeReply,650);
+    setTimeout(function(){$('#nextPuzzle').classList.add('on');},2600);
+  }
+}
+$('#goPuzzle').addEventListener('click',function(){
+  location.href='第二幕-题2-颐和路选楼.html';
+});
+
+/* ---------- 背包 ---------- */
+var bag=$('#bagPanel');
+$('#bagTri').addEventListener('click',function(e){
+  e.stopPropagation();bag.classList.toggle('on');
+});
+var slots=['信','明信片','钥匙','照片','小票','样书'];
+(function(){
+  var row=$('#bagSlots');
+  slots.forEach(function(nm){
+    var d=document.createElement('div');d.className='slot';
+    d.innerHTML='空';
+    row.appendChild(d);
+  });
+})();
+document.addEventListener('click',function(e){
+  if(!bag.classList.contains('on'))return;
+  if(!bag.contains(e.target)&&!$('#bagTri').contains(e.target))bag.classList.remove('on');
+});
+
+/* toast */
+var toastT=null;
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2600);
+}
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>

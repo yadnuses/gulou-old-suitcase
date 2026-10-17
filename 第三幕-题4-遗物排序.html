@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>题4 · 遗物时间线排序</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:#0a0805;color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:#120d08;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
+  overflow:hidden;opacity:0;transform:scale(.988);transition:opacity .7s ease-out,transform .7s ease-out}
+.stage.in{opacity:1;transform:scale(1)}
+/* 深色木墙背景 */
+.wall{position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(93deg,rgba(0,0,0,.12) 0 3px,rgba(0,0,0,0) 3px 7px),
+    repeating-linear-gradient(4deg,rgba(255,220,160,.028) 0 2px,rgba(0,0,0,0) 2px 46px),
+    linear-gradient(172deg,#2a2116 0%,#1a130b 55%,#100b06 100%)}
+.vig{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(130% 130% at 50% 42%,transparent 52%,rgba(5,3,1,.62) 100%)}
+/* 标题 */
+.title{position:absolute;z-index:10;left:50%;top:clamp(14px,3vmin,38px);transform:translateX(-50%);
+  text-align:center;pointer-events:none}
+.title .q{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(20px,3.8vmin,40px);
+  color:#f0e0ae;letter-spacing:.14em;text-indent:.14em;text-shadow:0 2px 10px rgba(0,0,0,.85)}
+.title .rule{display:block;width:clamp(70px,14vmin,150px);height:1px;margin:.4em auto 0;
+  background:linear-gradient(90deg,transparent,#c9a86a,transparent)}
+/* 左上日晷 */
+.dial-btn{position:absolute;z-index:20;left:2vmin;top:2vmin;width:clamp(54px,8.4vmin,88px);
+  aspect-ratio:1;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));
+  transition:transform .25s ease,filter .6s}
+.dial-btn:hover{transform:scale(1.06) rotate(6deg)}
+.dial-btn svg{width:100%;height:100%}
+.dial-full{position:absolute;inset:0;z-index:60;background:rgba(6,4,2,.84);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:2.2vmin}
+.dial-full.on{display:flex;animation:fadeIn .4s ease-out}
+.dial-full .big{width:clamp(220px,32vmin,340px);aspect-ratio:1;animation:dropIn .65s cubic-bezier(.2,1.4,.4,1) both}
+.dial-full .cap{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(19px,3vmin,30px);
+  color:#e9d9a8;letter-spacing:.3em;text-indent:.3em;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.dial-full .sub{font-size:clamp(11px,1.6vmin,15px);color:#b9a376;letter-spacing:.2em;text-indent:.2em}
+.dial-full .go{font-family:"Noto Serif SC",serif;font-size:clamp(13px,2vmin,20px);color:#3a2813;
+  background:linear-gradient(160deg,#e8c98c,#cf9f55);border:1px solid #a87934;border-radius:999px;
+  padding:.5em 1.7em .55em;cursor:pointer;letter-spacing:.24em;text-indent:.24em;
+  box-shadow:0 8px 22px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,240,200,.7);
+  transition:transform .2s,box-shadow .3s;opacity:.45}
+.dial-full .go.ready{opacity:1;animation:goldPulse 1.2s ease-in-out infinite}
+.dial-full .go:hover{transform:translateY(-2px) scale(1.04)}
+.dial-full .hint{font-size:clamp(10px,1.5vmin,14px);color:#9a8a5c;letter-spacing:.12em}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes dropIn{from{opacity:0;transform:scale(.7) translateY(-24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes goldPulse{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 0 rgba(217,163,92,.55)}50%{box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 12px rgba(217,163,92,0)}}
+/* 时间轴 */
+.timeline{position:absolute;z-index:14;left:6%;right:6%;top:clamp(96px,19vmin,220px)}
+.tl-bar{position:relative;height:clamp(2px,.5vmin,4px);
+  background:linear-gradient(90deg,rgba(201,168,106,.25),rgba(201,168,106,.85),rgba(201,168,106,.25));
+  border-radius:2px;box-shadow:0 0 14px rgba(217,163,92,.22)}
+.tl-year{position:absolute;top:-clamp(16px,3vmin,30px);font-size:clamp(12px,2vmin,20px);
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;color:#cbb98a;letter-spacing:.1em;
+  text-shadow:0 1px 6px rgba(0,0,0,.9)}
+.tl-year.y1947{left:0}.tl-year.y1949{right:0}
+.slots{position:absolute;top:-clamp(26px,4.6vmin,52px);left:clamp(24px,4.5vmin,56px);right:clamp(24px,4.5vmin,56px);
+  display:flex;justify-content:space-between}
+.slot{position:relative;width:clamp(64px,10.5vmin,118px);height:clamp(74px,12.6vmin,140px);
+  background:rgba(20,14,7,.55);border:1px dashed rgba(201,168,106,.42);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:border-color .3s,background .3s,box-shadow .3s}
+.slot.hover{border-color:rgba(217,163,92,.95);background:rgba(217,163,92,.1);box-shadow:0 0 16px rgba(217,163,92,.3) inset}
+.slot.filled{border-style:solid;border-color:rgba(201,168,106,.65);background:rgba(255,246,220,.05)}
+.slot.correct{border-color:rgba(217,163,92,.95);background:rgba(217,163,92,.14);
+  box-shadow:0 0 18px rgba(217,163,92,.4) inset,0 0 12px rgba(217,163,92,.25)}
+.slot.wrong{animation:shake .5s ease;border-color:rgba(180,70,50,.85)}
+.slot .idx{position:absolute;top:clamp(2px,.5vmin,5px);left:50%;transform:translateX(-50%);
+  font-size:clamp(9px,1.4vmin,14px);color:rgba(201,168,106,.5);letter-spacing:.1em}
+.slot .slotcard{position:absolute;inset:clamp(4px,.9vmin,8px);border-radius:4px;
+  background:#efe6cd;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(1px,.3vmin,3px);cursor:grab;box-shadow:0 8px 18px rgba(0,0,0,.5);
+  border:1px solid rgba(150,120,70,.5)}
+.slot .slotcard img{max-width:76%;max-height:58%;object-fit:contain;filter:sepia(.2) contrast(.98)}
+.slot .slotcard .sn{font-size:clamp(7px,1.1vmin,11px);color:#6b5130;letter-spacing:.04em;white-space:nowrap;
+  font-family:"Noto Serif SC",serif}
+.slot .date{position:absolute;bottom:-clamp(14px,2.5vmin,26px);left:50%;transform:translateX(-50%);
+  white-space:nowrap;font-size:clamp(9px,1.4vmin,13px);color:#e9d9a8;letter-spacing:.06em;
+  text-shadow:0 1px 5px rgba(0,0,0,.9);opacity:0;transition:opacity .4s}
+.slot.correct .date{opacity:1}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}45%{transform:translateX(6px)}70%{transform:translateX(-4px)}90%{transform:translateX(2px)}}
+/* 卡片区 */
+.cardrow{position:absolute;z-index:16;left:50%;bottom:clamp(64px,12vmin,140px);transform:translateX(-50%);
+  display:flex;gap:clamp(8px,1.6vmin,18px);align-items:flex-end}
+.card{position:relative;width:clamp(86px,13vmin,150px);aspect-ratio:3/4.2;cursor:grab;
+  background:linear-gradient(158deg,#f2ead2,#e7d9b5 55%,#d8c49a);
+  border:1px solid rgba(120,95,55,.5);border-radius:4px;
+  box-shadow:0 14px 30px rgba(0,0,0,.5),inset 0 0 28px rgba(158,124,70,.2);
+  padding:clamp(10px,1.8vmin,20px) clamp(8px,1.4vmin,16px);
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  transition:transform .3s cubic-bezier(.2,1.2,.4,1),box-shadow .3s;user-select:none}
+.card.dragging{opacity:.45;transform:scale(.96) rotate(-3deg)}
+.card.selected{transform:translateY(-clamp(8px,1.8vmin,18px));box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 clamp(2px,.5vmin,4px) rgba(217,163,92,.7)}
+.card::before,.card::after{content:"";position:absolute;top:clamp(4px,.9vmin,9px);width:clamp(4px,.8vmin,7px);height:clamp(4px,.8vmin,7px);
+  border-radius:50%;background:radial-gradient(circle at 35% 32%,#c9b183,#6f5a34 75%);
+  box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.card::before{left:clamp(5px,1vmin,10px)}.card::after{right:clamp(5px,1vmin,10px)}
+.card .pic{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.card .pic img{max-width:92%;max-height:100%;object-fit:contain;filter:sepia(.22) contrast(.97)}
+.card .cn{font-size:clamp(9px,1.5vmin,14px);color:#6b5130;letter-spacing:.08em;text-align:center;
+  font-family:"Noto Serif SC",serif;padding-top:clamp(3px,.7vmin,7px)}
+/* 底部背包 */
+.bag-tri{position:absolute;z-index:30;left:50%;bottom:clamp(6px,1.4vmin,16px);transform:translateX(-50%);
+  width:clamp(24px,3.8vmin,42px);height:clamp(24px,3.8vmin,42px);cursor:pointer;
+  display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55));
+  transition:transform .2s}
+.bag-tri:hover{transform:translateX(-50%) scale(1.12)}
+.bag-panel{position:absolute;z-index:40;left:50%;bottom:clamp(34px,6.4vmin,76px);transform:translateX(-50%) translateY(10px);
+  width:clamp(420px,72vmin,780px);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+.bag-panel.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.bag-panel .inner{background:linear-gradient(160deg,#2a2015,#1a120a 70%);
+  border:1px solid rgba(201,168,106,.38);border-radius:10px;padding:clamp(8px,1.5vmin,14px);
+  box-shadow:0 18px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,240,200,.08)}
+.bag-panel .row{display:flex;gap:clamp(6px,1.2vmin,12px);justify-content:center;flex-wrap:wrap}
+.bagmini{position:relative;width:clamp(44px,7.6vmin,72px);aspect-ratio:1;border-radius:8px;
+  border:1px solid rgba(217,163,92,.75);background:rgba(217,163,92,.12);
+  display:flex;align-items:center;justify-content:center;cursor:grab}
+.bagmini img{max-width:74%;max-height:74%;object-fit:contain}
+.bagmini .nm{position:absolute;bottom:-1.2em;left:50%;transform:translateX(-50%);
+  font-size:clamp(8px,1.2vmin,11px);color:#a08c60;letter-spacing:.06em;white-space:nowrap}
+.bagmini .used{position:absolute;top:0;right:0;width:clamp(13px,2vmin,20px);height:clamp(13px,2vmin,20px);
+  border-radius:50%;background:#d9a35c;color:#3a2813;font-size:clamp(8px,1.2vmin,11px);
+  display:none;align-items:center;justify-content:center}
+/* 信封解锁 */
+.env-modal{position:absolute;inset:0;z-index:70;background:rgba(5,3,1,.84);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center}
+.env-modal.on{display:flex;animation:fadeIn .4s ease-out}
+.env{position:relative;width:clamp(280px,34vmin,380px);aspect-ratio:5/3.4;cursor:pointer;
+  background:linear-gradient(160deg,#eadfc4,#d9c7a0);
+  box-shadow:0 24px 60px rgba(0,0,0,.7);rotate:-1.2deg;animation:dropIn .6s cubic-bezier(.2,1.3,.4,1) both;
+  transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.2,.3,1)}
+.env.flip{animation:none;transform:rotateY(180deg) rotate(-1.2deg)}
+.env .face,.env .back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  padding:clamp(14px,2.4vmin,24px);font-family:"Ma Shan Zheng","Kaiti SC",cursive;color:#5b4324;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.env .back{transform:rotateY(180deg);background:linear-gradient(160deg,#f1e9d2,#e2d4ae);gap:1em}
+.env .back .bk{font-size:clamp(17px,2.7vmin,30px);color:#8a2f23;letter-spacing:.14em;text-indent:.14em;line-height:1.7}
+.env .back .small{font-size:clamp(10px,1.5vmin,14px);color:#7a6138;letter-spacing:.1em;opacity:.8}
+.env .ecap{font-size:clamp(11px,1.7vmin,15px);color:#8d7a50;letter-spacing:.12em}
+.env-modal .eclose{position:absolute;right:6%;top:7%;width:clamp(34px,5vmin,52px);height:clamp(34px,5vmin,52px);
+  border-radius:50%;border:1px solid rgba(201,168,106,.55);background:rgba(20,14,7,.6);color:#dcc98f;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:clamp(14px,2.2vmin,22px)}
+/* toast */
+.toast{position:absolute;z-index:80;left:50%;top:15%;transform:translateX(-50%);
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(15px,2.6vmin,26px);color:#e9d9a8;
+  letter-spacing:.2em;text-indent:.2em;background:rgba(20,14,7,.74);border:1px solid rgba(201,168,106,.4);
+  padding:.6em 1.4em;border-radius:999px;opacity:0;pointer-events:none;
+  box-shadow:0 10px 28px rgba(0,0,0,.5);transition:opacity .3s;text-align:center;max-width:88%}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .dial-full .big{animation:none!important}
+  .card,.slot,.env{transition:none!important}
+}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page">
+  <div class="stage" id="stage">
+    <div class="wall"></div>
+    <div class="vig"></div>
+
+    <div class="title">
+      <span class="q">这六件东西，是按什么顺序来到外婆手里的？</span>
+      <span class="rule"></span>
+    </div>
+
+    <div class="dial-btn" id="dialBtn"></div>
+
+    <!-- 时间轴 -->
+    <div class="timeline" id="timeline">
+      <span class="tl-year y1947">1947 春</span>
+      <span class="tl-year y1949">1949 冬</span>
+      <div class="tl-bar"></div>
+      <div class="slots" id="slots"></div>
+    </div>
+
+    <!-- 卡片区 -->
+    <div class="cardrow" id="cardrow"></div>
+
+    <div class="bag-tri" id="bagTri"><svg viewBox="0 0 60 52" style="width:100%;height:100%">
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="rgba(217,163,92,.88)"/>
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="none" stroke="#3a2813" stroke-width="2"/>
+      <path d="M16 34 h28" stroke="#3a2813" stroke-width="2.4" stroke-linecap="round"/>
+    </svg></div>
+    <div class="bag-panel" id="bagPanel">
+      <div class="inner"><div class="row" id="bagRow"></div></div>
+    </div>
+
+    <!-- 信封解锁 -->
+    <div class="env-modal" id="envModal">
+      <div class="eclose" id="envClose">×</div>
+      <div class="env" id="env">
+        <div class="face">
+          <p class="ecap">没寄出的信 · 1949.1.19 夜</p>
+          <p style="font-size:clamp(12px,1.9vmin,18px);margin-top:.6em;color:#7a6138">（点一下 · 看背面）</p>
+        </div>
+        <div class="back">
+          <span class="bk">我在下关码头<br>等过他。</span>
+          <span class="small">—— 信封背面的一行小字</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 图片池（路径仅存在于 HTML src） -->
+    <div class="imgpool" hidden>
+      <img data-card="book" src="assets/item-book.png" alt="">
+      <img data-card="map" src="assets/p10-map.png" alt="">
+      <img data-card="receipt" src="assets/item-receipt.png" alt="">
+      <img data-card="letter" src="assets/item-letter.png" alt="">
+      <img data-card="key" src="assets/item-key.png" alt="">
+      <img data-card="photo" src="assets/item-photo.png" alt="">
+    </div>
+
+    <!-- 全屏日晷 -->
+    <div class="dial-full" id="dialFull">
+      <div class="big" id="dialBig"></div>
+      <span class="cap" id="dialCap">未时 · 下午</span>
+      <span class="sub">拨到戌时 · 天快黑了</span>
+      <span class="hint" id="dialHint"></span>
+      <button class="go" id="goBtn">前往下一幕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var curHour=7; /* 未时 */
+var $=function(s){return document.querySelector(s)};
+var HOUR_NAMES=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+function dialSVG(hour){
+
+
+  var HN=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  var s='<svg viewBox="0 0 400 400">'
+  +'<defs><radialGradient id="brz" cx="38%" cy="32%" r="78%"><stop offset="0%" stop-color="#7c8b74"/><stop offset="45%" stop-color="#54634f"/><stop offset="78%" stop-color="#33422e"/><stop offset="100%" stop-color="#24301f"/></radialGradient>'
+  +'<radialGradient id="rim" cx="45%" cy="38%" r="80%"><stop offset="0%" stop-color="#8a7a54"/><stop offset="60%" stop-color="#5d4e34"/><stop offset="100%" stop-color="#382d1c"/></radialGradient>'
+  +'<radialGradient id="pat" cx="42%" cy="36%" r="70%"><stop offset="0%" stop-color="rgba(126,168,132,.42)"/><stop offset="55%" stop-color="rgba(96,134,105,.18)"/><stop offset="100%" stop-color="rgba(96,134,105,0)"/></radialGradient></defs>'
+  +'<circle cx="200" cy="200" r="194" fill="#221c12" stroke="rgba(0,0,0,.5)" stroke-width="2"/>'
+  +'<circle cx="200" cy="200" r="184" fill="url(#rim)"/>'
+  +'<circle cx="200" cy="200" r="168" fill="url(#brz)"/>'
+  +'<circle cx="200" cy="200" r="168" fill="url(#pat)" opacity=".5"/>'
+  +'<circle cx="200" cy="200" r="150" fill="none" stroke="rgba(180,196,152,.4)" stroke-width="2"/>'
+  +'<circle cx="200" cy="200" r="132" fill="none" stroke="rgba(180,196,152,.22)" stroke-width="1.5" stroke-dasharray="2 6"/>';
+  for(var i=0;i<12;i++){
+    var a=i*30*Math.PI/180;
+    s+='<line x1="'+(200+Math.sin(a)*180).toFixed(1)+'" y1="'+(200-Math.cos(a)*180).toFixed(1)+'" x2="'+(200+Math.sin(a)*168).toFixed(1)+'" y2="'+(200-Math.cos(a)*168).toFixed(1)+'" stroke="rgba(176,196,150,.55)" stroke-width="2.2"/>';
+    s+='<text x="'+(200+Math.sin(a)*142).toFixed(1)+'" y="'+(200-Math.cos(a)*142+10).toFixed(1)+'" text-anchor="middle" font-size="24" fill="rgba(216,226,184,.9)" font-family="Kaiti SC,STKaiti,serif">'+HN[i]+'</text>';
+  }
+  var ha=hour*30*Math.PI/180;
+  s+='<path d="M200 200 Q232 182 252 198 T284 214" fill="none" stroke="rgba(18,24,14,.6)" stroke-width="2.6" stroke-linecap="round"/>'
+  +'<path d="M200 200 L212 190 L206 178" fill="none" stroke="rgba(18,24,14,.45)" stroke-width="1.6" stroke-linecap="round"/>'
+  +'<line x1="200" y1="200" x2="'+(200+Math.sin(ha)*96).toFixed(1)+'" y2="'+(200-Math.cos(ha)*96).toFixed(1)+'" stroke="#d9c07e" stroke-width="6" stroke-linecap="round"/>'
+  +'<line x1="200" y1="200" x2="'+(200+Math.sin(ha)*96).toFixed(1)+'" y2="'+(200-Math.cos(ha)*96).toFixed(1)+'" stroke="#8a6a35" stroke-width="2.4" stroke-linecap="round"/>'
+  +'<path d="M'+(200+Math.sin(ha+Math.PI/2)*38).toFixed(1)+' '+(200-Math.cos(ha+Math.PI/2)*38).toFixed(1)+' L'+(200+Math.sin(ha)*74).toFixed(1)+' '+(200-Math.cos(ha)*74).toFixed(1)+' L'+(200+Math.sin(ha-Math.PI/2)*38).toFixed(1)+' '+(200-Math.cos(ha-Math.PI/2)*38).toFixed(1)+'" fill="none" stroke="#d9c07e" stroke-width="3.2" stroke-linecap="round"/>'
+  +'<circle cx="200" cy="200" r="24" fill="#2b2415" stroke="rgba(200,178,120,.55)" stroke-width="2.5"/>'
+  +'<circle cx="200" cy="200" r="7" fill="#d9c07e"/></svg>';
+  return s;
+}
+$('#dialBtn').innerHTML=dialSVG(curHour);
+
+/* 六件遗物（答案顺序）—— 图片路径取自 HTML 图片池 */
+var ITEMS=[
+  {id:'book',   nm:'《京话》目录页', date:'1947 春 · 开栏'},
+  {id:'map',    nm:'老地图',         date:'1948 秋 · 引路'},
+  {id:'receipt',nm:'购书小票',       date:'1948.12.21 · 书店'},
+  {id:'letter', nm:'没寄出的信',     date:'1949.1.19 夜 · 七页'},
+  {id:'key',    nm:'黄铜钥匙',       date:'1949.1.22 夜 · 收箱'},
+  {id:'photo',  nm:'外婆的照片',     date:'1949.1.22 深夜 · 题字'}
+];
+function getImg(id){
+  var n=document.querySelector('.imgpool img[data-card="'+id+'"]');
+  return n?n.getAttribute('src'):'';
+}
+var ANSWER=['book','map','receipt','letter','key','photo'];
+var slots=[null,null,null,null,null,null]; /* 槽内 item id */
+var selectedCard=null; /* 卡片区选中 */
+var won=false;
+
+/* 构建槽 */
+var slotsHost=$('#slots');
+ITEMS.forEach(function(it,i){
+  var s=document.createElement('div');
+  s.className='slot';s.dataset.si=i;
+  s.innerHTML='<span class="idx">'+(i+1)+'</span>';
+  slotsHost.appendChild(s);
+});
+function renderSlots(){
+  slotsHost.querySelectorAll('.slot').forEach(function(s,si){
+    s.classList.remove('filled','correct','wrong','hover');
+    var old=s.querySelector('.slotcard');
+    if(old)old.remove();
+    var date=s.querySelector('.date');
+    if(date)date.remove();
+    if(slots[si]){
+      s.classList.add('filled');
+      var item=getItem(slots[si]);
+      var sc=document.createElement('div');
+      sc.className='slotcard';sc.draggable=true;sc.dataset.card=item.id;
+      sc.innerHTML='<img src="'+getImg(item.id)+'" alt=""><span class="sn">'+item.nm+'</span>';
+      s.appendChild(sc);
+      var dt=document.createElement('span');dt.className='date';dt.textContent=item.date;
+      s.appendChild(dt);
+      if(slots[si]===ANSWER[si])s.classList.add('correct');
+    }
+  });
+}
+function getItem(id){for(var i=0;i<ITEMS.length;i++)if(ITEMS[i].id===id)return ITEMS[i];return null;}
+
+/* 卡片区 */
+var row=$('#cardrow');
+function renderCards(){
+  row.innerHTML='';
+  var order=shuffleList(ITEMS.map(function(it){return it.id;}));
+  order.forEach(function(id){
+    if(slots.indexOf(id)!==-1)return; /* 已入槽不显示 */
+    var it=getItem(id);
+    var c=document.createElement('div');
+    c.className='card';c.draggable=true;c.dataset.card=id;
+    c.innerHTML='<span class="pic"><img src="'+getImg(it.id)+'" alt=""></span><span class="cn">'+it.nm+'</span>';
+    row.appendChild(c);
+  });
+}
+function shuffleList(a){
+  var r=a.slice();
+  for(var i=r.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=r[i];r[i]=r[j];r[j]=t;
+  }
+  return r;
+}
+renderCards();
+
+/* 拖拽 */
+var dragItem=null,dragSlot=-1;
+document.addEventListener('dragstart',function(e){
+  var t=e.target.closest('[data-card]');
+  if(!t)return;
+  dragItem=t.dataset.card;
+  dragSlot=t.closest('.slot')?parseInt(t.closest('.slot').dataset.si,10):-1;
+  e.dataTransfer.setData('text/plain',dragItem);
+  e.dataTransfer.effectAllowed='move';
+  var c=t.closest('.card');
+  if(c)c.classList.add('dragging');
+});
+document.addEventListener('dragend',function(e){
+  var c=e.target.closest('.card');
+  if(c)c.classList.remove('dragging');
+  dragItem=null;dragSlot=-1;
+});
+slotsHost.querySelectorAll('.slot').forEach(function(s){
+  s.addEventListener('dragover',function(e){
+    e.preventDefault();e.dataTransfer.dropEffect='move';
+    s.classList.add('hover');
+  });
+  s.addEventListener('dragleave',function(){s.classList.remove('hover');});
+  s.addEventListener('drop',function(e){
+    e.preventDefault();s.classList.remove('hover');
+    var si=parseInt(s.dataset.si,10);
+    var id=e.dataTransfer.getData('text/plain')||dragItem;
+    if(!id)return;
+    var srcSlot=-1;
+    for(var i=0;i<6;i++)if(slots[i]===id)srcSlot=i;
+    if(dragSlot>=0){ /* 槽内卡拖动 */
+      var t=slots[dragSlot];
+      slots[dragSlot]=slots[si];
+      slots[si]=t;
+    }else if(srcSlot>=0){ /* 卡片区→槽：从原槽移出 */
+      slots[srcSlot]=null;
+      slots[si]=id;
+    }else{ /* 卡片区→槽 */
+      slots[si]=id;
+    }
+    renderSlots();renderCards();
+    checkAll();
+  });
+});
+/* 点击兜底交互 */
+row.addEventListener('click',function(e){
+  var c=e.target.closest('.card');
+  if(!c)return;
+  if(selectedCard===c.dataset.card){
+    selectedCard=null;
+    c.classList.remove('selected');
+    return;
+  }
+  document.querySelectorAll('.card').forEach(function(x){x.classList.remove('selected');});
+  selectedCard=c.dataset.card;c.classList.add('selected');
+  toast('已选中「'+getItem(c.dataset.card).nm+'」——点时间轴上的空位放入');
+});
+slotsHost.addEventListener('click',function(e){
+  var s=e.target.closest('.slot');
+  if(!s)return;
+  var si=parseInt(s.dataset.si,10);
+  if(selectedCard){
+    var id=selectedCard;
+    var srcSlot=-1;
+    for(var i=0;i<6;i++)if(slots[i]===id)srcSlot=i;
+    if(srcSlot>=0){slots[srcSlot]=null;slots[si]=id;}
+    else slots[si]=id;
+    selectedCard=null;
+    document.querySelectorAll('.card').forEach(function(x){x.classList.remove('selected');});
+    renderSlots();renderCards();checkAll();
+  }else if(e.target.closest('.slotcard')){
+    /* 取出槽内卡回卡片区 */
+    var id=slots[si];
+    if(id){slots[si]=null;renderSlots();renderCards();toast('取出了「'+getItem(id).nm+'」');}
+  }
+});
+/* 背包 */
+var bag=$('#bagPanel');
+$('#bagTri').addEventListener('click',function(e){e.stopPropagation();bag.classList.toggle('on');renderBag();});
+function renderBag(){
+  var row2=$('#bagRow');row2.innerHTML='';
+  ITEMS.forEach(function(it){
+    var d=document.createElement('div');
+    d.className='bagmini';d.draggable=true;d.dataset.card=it.id;
+    d.innerHTML='<img src="'+getImg(it.id)+'" alt=""><span class="nm">'+it.nm+'</span><span class="used">✓</span>';
+    row2.appendChild(d);
+  });
+}
+document.addEventListener('click',function(e){
+  if(!bag.classList.contains('on'))return;
+  if(!bag.contains(e.target)&&!$('#bagTri').contains(e.target))bag.classList.remove('on');
+});
+
+/* 判定 */
+var checking=false;
+function checkAll(){
+  var full=slots.every(function(v){return !!v;});
+  if(!full||checking||won)return;
+  var ok=slots.every(function(v,i){return v===ANSWER[i];});
+  if(ok){
+    checking=true;won=true;
+    toast('对——就是这样一件一件，来到外婆手里的');
+    slotsHost.querySelectorAll('.slot').forEach(function(s,si){
+      s.classList.add('correct');
+    });
+    setTimeout(function(){
+      toast('信封背面，好像写着一行字……');
+      $('#envModal').classList.add('on');
+    },1600);
+  }else{
+    checking=true;
+    slotsHost.querySelectorAll('.slot').forEach(function(s,si){
+      if(slots[si]!==ANSWER[si])s.classList.add('wrong');
+    });
+    toast('顺序不对——再想想，哪件最先来到她手里？');
+    setTimeout(function(){
+      slotsHost.querySelectorAll('.slot').forEach(function(s){s.classList.remove('wrong');});
+      checking=false;
+    },1100);
+  }
+}
+
+/* 信封 */
+var env=$('#env');
+env.addEventListener('click',function(){
+  env.classList.add('flip');
+  setTimeout(function(){toast('我在下关码头……等过他');},700);
+});
+$('#envClose').addEventListener('click',function(){
+  $('#envModal').classList.remove('on');
+  setTimeout(function(){
+    $('#dialBtn').style.filter='drop-shadow(0 0 14px rgba(217,163,92,.9))';
+    openDial();
+  },600);
+});
+$('#envModal').addEventListener('click',function(e){
+  if(e.target===envModal)envModal.classList.remove('on');
+});
+function openDial(){
+  $('#dialBig').innerHTML=dialSVG(curHour);
+  $('#dialCap').textContent='未时 · 下午';
+  $('#goBtn').classList.remove('ready');
+  $('#dialHint').textContent='把日晷拨到戌时——天快黑了';
+  $('#dialFull').classList.add('on');
+}
+$('#dialBtn').addEventListener('click',function(e){e.stopPropagation();openDial();});
+$('#dialFull').addEventListener('click',function(e){
+  if(e.target===dialFull)dialFull.classList.remove('on');
+});
+$('#dialBig').addEventListener('click',function(){
+  curHour=(curHour+1)%12;
+  $('#dialBig').innerHTML=dialSVG(curHour);
+  var nm=HOUR_NAMES[curHour];
+  $('#dialCap').textContent=(nm==='戌'?'戌时 · 夜':'拨动中');
+  if(curHour===10){ /* 戌时 */
+    $('#goBtn').classList.add('ready');
+    $('#dialHint').textContent='戌时 · 1949.1.22 夜 —— 姚颖走了，外婆把钥匙和信收进皮箱';
+    toast('戌时 · 天黑了');
+  }
+});
+$('#goBtn').addEventListener('click',function(){
+  if(!$('#goBtn').classList.contains('ready'))return;
+  var st=$('#stage');
+  st.style.transition='opacity .9s ease';st.style.opacity='0';
+  setTimeout(function(){location.href='第三幕-题5-27页信纸.html';},950);
+});
+
+/* toast */
+var toastT=null;
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);
+}
+setTimeout(function(){
+  document.getElementById('stage').classList.add('in');
+},60);
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>

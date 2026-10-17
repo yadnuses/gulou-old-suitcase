@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>线上终章 · 出门地图</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:#0a0805;color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased}
+/* 防止地图底图被鼠标拖拽走 */
+img{-webkit-user-drag:none;-moz-user-drag:none;user-drag:none;user-select:none;-webkit-user-select:none;pointer-events:auto}
+.map .mv{pointer-events:none}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  box-shadow:0 24px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;
+  opacity:0;transform:scale(.988);transition:opacity .7s ease-out,transform .7s ease-out}
+.stage.in{opacity:1;transform:scale(1)}
+.map{position:absolute;inset:0;background:#d9c79e}
+.map .mv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .38s ease;filter:saturate(.9) brightness(.92)}
+.map .mv.on{opacity:1}
+.map::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(60,42,18,.34) 100%)}
+/* 日晷 */
+.dial-btn{position:absolute;z-index:20;left:1.6vmin;top:1.6vmin;width:clamp(58px,9vmin,96px);
+  aspect-ratio:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));cursor:pointer}
+.dial-btn svg{width:100%;height:100%}
+.dial-btn .tip{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:1vmin;
+  font-size:clamp(10px,1.5vmin,14px);color:#7a5f33;letter-spacing:.1em;white-space:nowrap;opacity:0;transition:opacity .3s}
+.dial-btn:hover .tip{opacity:1}
+/* 标题 */
+.title{position:absolute;z-index:6;left:50%;top:3.6vmin;transform:translateX(-50%);text-align:center;pointer-events:none}
+.title .pre{display:block;font-size:clamp(11px,1.7vmin,16px);color:#8a6a3a;letter-spacing:.42em;margin-bottom:.4em}
+.title h1{font-size:clamp(19px,3.2vmin,32px);font-weight:700;color:#4a3316;letter-spacing:.16em;text-indent:.16em;
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-weight:400;
+  text-shadow:0 1px 0 rgba(255,255,255,.3)}
+/* 点位热区（透明，点击弹出点位卡；地图全屏无右侧栏） */
+.spot{position:absolute;z-index:12;transform:translate(-50%,-50%);cursor:pointer;
+  width:clamp(110px,16vmin,175px);height:clamp(110px,16vmin,175px);pointer-events:auto}
+.spot:hover{filter:drop-shadow(0 0 10px rgba(232,190,110,.55))}
+.spot .nm{position:absolute;top:-7%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(243,231,196,.94);border:1px solid rgba(154,122,64,.6);border-radius:3px;
+  padding:.34em .9em;font-size:clamp(14px,2.1vmin,20px);color:#4a3316;font-weight:700;letter-spacing:.05em;
+  white-space:nowrap;text-shadow:none;box-shadow:0 2px 8px rgba(0,0,0,.22);
+  transition:background .3s,border-color .3s,color .3s;pointer-events:auto}
+.spot.on .nm{background:#a01f14;border-color:#c23a26;color:#f6ecd0}
+.spot::after{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  border:2px solid rgba(232,190,110,0)}
+.spot.on{filter:drop-shadow(0 0 14px rgba(232,190,110,.95))}
+.spot.on::after{border-color:rgba(232,190,110,.9);animation:spotPulse 1.2s ease-out infinite}
+@keyframes spotPulse{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+/* 底部说明 */
+.footnote{position:absolute;z-index:8;left:50%;bottom:6.2%;transform:translateX(-50%);
+  width:min(80vmin,1060px);text-align:center;
+  font-size:clamp(11px,1.7vmin,16px);color:#5d3f1c;line-height:1.7;letter-spacing:.06em;
+  text-shadow:0 1px 0 rgba(255,255,255,.4);pointer-events:none}
+/* 今昔对比入口 */
+.cmp-btn{position:absolute;z-index:14;left:50%;bottom:16.6%;transform:translate(-50%,8px);
+  padding:10px 26px;border-radius:3px;cursor:pointer;opacity:0;pointer-events:none;white-space:nowrap;
+  background:radial-gradient(120% 120% at 50% 0%,#7c6134,#5a4422 68%,#46341a);
+  border:1px solid rgba(240,200,130,.6);color:#f6ecd0;letter-spacing:.16em;
+  font-size:clamp(13px,2vmin,18px);box-shadow:0 8px 22px rgba(0,0,0,.5);
+  transition:opacity .5s,transform .5s,filter .2s;animation:cmpPulse 2.6s ease-in-out infinite}
+.cmp-btn:hover{filter:brightness(1.14)}
+.cmp-btn.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+@keyframes cmpPulse{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 0 0 rgba(240,200,130,.45)}
+  50%{box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 0 12px rgba(240,200,130,0)}}
+/* 点位卡 */
+.card{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(44vmin,520px);background:linear-gradient(165deg,#f6ecd0,#ecdbb2);
+  border:1.5px solid #c9a86a;border-radius:6px;box-shadow:0 26px 70px rgba(0,0,0,.6);
+  padding:3vmin 3.4vmin;color:#3c2c18;display:none}
+.card.on{display:block;animation:cardin .45s ease}
+@keyframes cardin{0%{opacity:0;transform:translate(-50%,-50%) scale(.85)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.card .c-seal{position:absolute;top:-2.2vmin;left:50%;transform:translateX(-50%);
+  width:clamp(40px,6vmin,62px);height:clamp(40px,6vmin,62px);border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#c0452f,#a01f14 62%,#7c1208);
+  border:2px solid rgba(255,220,190,.55);box-shadow:0 5px 12px rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;
+  color:#f6e6d0;font-size:clamp(14px,2.3vmin,22px);font-weight:700}
+.card .c-name{text-align:center;font-size:clamp(17px,2.8vmin,26px);font-weight:700;color:#4a3316;
+  letter-spacing:.1em;margin-top:1.4vmin;font-family:"Ma Shan Zheng",cursive;font-weight:400}
+.card .c-time{text-align:center;font-size:clamp(11px,1.7vmin,16px);color:#a8894f;letter-spacing:.18em;margin:.8vmin 0 1.6vmin}
+.card .c-line{height:1px;background:linear-gradient(90deg,transparent,#c9a86a,transparent);margin-bottom:1.6vmin}
+.card .c-txt{font-size:clamp(12px,1.9vmin,18px);line-height:1.9;color:#4a3316;white-space:pre-line}
+.card .c-txt b{color:#a01f14}
+.card .c-close{position:absolute;top:-1.4vmin;right:-1.4vmin;width:clamp(30px,4.6vmin,46px);height:clamp(30px,4.6vmin,46px);
+  border-radius:50%;background:radial-gradient(circle at 35% 30%,#e9c77f,#c99b52 60%,#8a6a2f);
+  border:1.5px solid #f0e3c0;color:#2d1f0d;font-size:clamp(13px,2vmin,20px);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 5px 12px rgba(0,0,0,.35);
+  transition:transform .2s}
+.card .c-close:hover{transform:scale(1.1)}
+/* 背包三角 */
+.bag-tri{position:absolute;z-index:30;left:50%;bottom:clamp(3px,0.8vmin,9px);transform:translateX(-50%);
+  width:clamp(24px,3.8vmin,40px);height:clamp(24px,3.8vmin,40px);
+  display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))}
+/* 占位提示 */
+.toast{position:absolute;z-index:50;left:50%;top:11%;transform:translateX(-50%);
+  background:rgba(30,21,10,.92);border:1px solid rgba(217,163,92,.6);border-radius:3px;
+  padding:.7em 1.6em;font-size:clamp(12px,1.8vmin,17px);color:#f2e7cf;letter-spacing:.1em;
+  opacity:0;transition:opacity .4s;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+.toast.on{opacity:1}
+/* 背包面板（统一） */
+.bag-panel{position:absolute;z-index:40;left:50%;bottom:clamp(30px,6.4vmin,74px);transform:translateX(-50%) translateY(10px);
+  width:clamp(210px,34vmin,340px);opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s ease;
+  background:linear-gradient(165deg,rgba(28,22,14,.96),rgba(16,12,7,.97));border:1px solid rgba(214,170,96,.5);border-radius:12px;
+  box-shadow:0 14px 40px rgba(0,0,0,.6),inset 0 0 24px rgba(120,90,40,.12)}
+.bag-panel.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.bag-panel .inner{padding:clamp(10px,1.8vmin,16px)}
+.bag-panel .bag-title{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(12px,1.9vmin,16px);color:#e8cf9c;letter-spacing:.2em;margin-bottom:clamp(8px,1.3vmin,12px);text-align:center}
+.bag-panel .row{display:flex;flex-wrap:wrap;gap:clamp(6px,1.2vmin,12px);justify-content:center}
+.bag-panel .slot{width:clamp(46px,8vmin,70px);height:clamp(46px,8vmin,70px);border-radius:8px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(201,168,106,.42);display:flex;align-items:center;justify-content:center;
+  font-family:"Kaiti SC",serif;font-size:clamp(11px,1.7vmin,14px);color:#d8c391;text-align:center;line-height:1.4;padding:2px}
+.bag-panel .slot.empty{color:rgba(190,160,100,.35)}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page">
+  <div class="stage" id="stage">
+    <div class="map" id="map">
+      <img class="mv on" id="mvAll" src="assets/p16-map.png" alt="">
+    </div>
+
+    <div class="dial-btn" id="dialBtn">
+      <svg viewBox="0 0 400 400" style="width:100%;height:100%">
+        <circle cx="200" cy="200" r="186" fill="#221a0e" stroke="rgba(201,168,106,.55)" stroke-width="3"/>
+        <circle cx="200" cy="200" r="174" fill="#55472f"/>
+        <circle cx="200" cy="200" r="156" fill="none" stroke="rgba(255,240,205,.32)" stroke-width="1.5" stroke-dasharray="3 7"/>
+        <g id="ringChars"></g>
+        <text x="200" y="63" text-anchor="middle" font-size="23" fill="rgba(240,222,175,.85)" font-family="Kaiti SC,STKaiti,serif">卯</text>
+        <line id="dialHour" x1="200" y1="200" x2="374" y2="200" stroke="#e0b264" stroke-width="7" stroke-linecap="round"/>
+        <line id="dialMin" x1="200" y1="200" x2="26" y2="200" stroke="#3a2c16" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="200" cy="200" r="26" fill="#241a0d" stroke="rgba(255,240,205,.5)" stroke-width="2"/>
+        <circle cx="200" cy="200" r="5" fill="#e0b264"/>
+      </svg>
+      <span class="tip">时辰都亮了——随便拨</span>
+    </div>
+
+    <div class="title">
+      <span class="pre">线上终章 · 出门</span>
+      <h1>替她看看今天的南京。</h1>
+    </div>
+
+    <!-- 五个点位热区（透明，对准图上建筑印字，点击切换地图图） -->
+    <div class="spot" id="spot0" style="left:19%;top:38%"><span class="nm">下关中山码头</span></div>
+    <div class="spot" id="spot1" style="left:40%;top:32%"><span class="nm">静海寺 · 天妃宫</span></div>
+    <div class="spot" id="spot2" style="left:57%;top:32%"><span class="nm">颐和路十二片区</span></div>
+    <div class="spot" id="spot3" style="left:26%;top:59%"><span class="nm">阅江楼</span></div>
+    <div class="spot" id="spot4" style="left:49%;top:60%"><span class="nm">先锋书店五台山店</span></div>
+
+    <div class="footnote">你已经看完了姚颖的故事，欢迎根据地图指示，到江苏省南京市鼓楼区，探索她的世界里细碎而可爱的南京。</div>
+
+    <!-- 今昔对比入口（五个点位都看过后亮起） -->
+    <div class="cmp-btn" id="cmpBtn">五个点位都看过了 —— 去看看今昔对比 ›</div>
+
+    <!-- 点位卡 -->
+    <div class="card" id="card">
+      <div class="c-close" id="cardClose">×</div>
+      <div class="c-seal" id="cardSeal">卯</div>
+      <div class="c-name" id="cardName"></div>
+      <div class="c-time" id="cardTime"></div>
+      <div class="c-line"></div>
+      <div class="c-txt" id="cardTxt"></div>
+    </div>
+
+    <div class="bag-tri" id="bagTri"><svg viewBox="0 0 60 52" style="width:100%;height:100%">
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="rgba(217,163,92,.88)"/>
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="none" stroke="#3a2813" stroke-width="2"/>
+      <path d="M16 34 h28" stroke="#3a2813" stroke-width="2.4" stroke-linecap="round"/>
+    </svg></div><div class="bag-panel" id="bagPanel"><div class="inner"><div class="bag-title">背包 · 外婆的旧物</div><div class="row"></div></div></div>
+
+    <!-- 占位提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 图片池（路径仅存在于 HTML src） -->
+    <div class="imgpool" hidden>
+      <img data-im="dock" src="assets/p13-dock.png" alt="">
+      <img data-im="ch1" src="assets/p14-ch1-congee.png" alt="">
+      <img data-im="ch2" src="assets/p14-ch2-wutong.png" alt="">
+      <img data-im="ch3" src="assets/p14-ch3-river.png" alt="">
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+var stage=document.getElementById('stage');
+setTimeout(function(){stage.classList.add('in');},60);
+
+/* 日晷：外圈五时辰全亮，指针可自由拨动 */
+var FIVE={3:'卯',4:'辰',6:'午',8:'申',10:'戌'};
+var NAMES=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var idx=3; /* 卯 */
+function rot(hour){
+  var a=hour/12*360-90, b=((hour+6)%12)/12*360-90;
+  var h=document.getElementById('dialHour'),m=document.getElementById('dialMin');
+  h.setAttribute('x2',String(200+178*Math.cos(a*Math.PI/180)));
+  h.setAttribute('y2',String(200+178*Math.sin(a*Math.PI/180)));
+  m.setAttribute('x2',String(200+178*Math.cos(b*Math.PI/180)));
+  m.setAttribute('y2',String(200+178*Math.sin(b*Math.PI/180)));
+  var t=document.querySelector('.dial-btn text');
+  t.textContent=NAMES[hour];
+}
+/* 外圈五时辰亮字 */
+var rc=document.getElementById('ringChars');
+var rh='';
+Object.keys(FIVE).forEach(function(k){
+  var h=parseInt(k,10),a=h/12*360*Math.PI/180;
+  rh+='<text x="'+String(200+158*Math.sin(a))+'" y="'+String(200-158*Math.cos(a)+6)+'" text-anchor="middle" font-size="19" fill="#e8c27a" font-family="Kaiti SC,STKaiti,serif" font-weight="bold">'+FIVE[h]+'</text>';
+});
+rc.innerHTML=rh;
+rot(3);
+document.getElementById('dialBtn').addEventListener('click',function(){
+  idx=(idx+1)%12;
+  rot(idx);
+});
+
+/* 五个点位 */
+var POINTS=[
+ {id:'spot0',pc:'pc0',seal:'卯',name:'下关中山码头',time:'卯时 · 日出',
+  txt:'江边看日出的人比等船的多。\n中山码头旧楼顶上的钟还在走。\n联动：江畔旧事茶社 · 凭本页面出示，任点一杯立减 5 元。'},
+ {id:'spot1',pc:'pc1',seal:'辰',name:'静海寺 · 天妃宫',time:'辰时 · 晨',
+  txt:'寺里那支签，她求过。\n签上写“相思止于笺”。\n联动：天妃宫文创店 · 凭本页面出示，明信片 9 折。'},
+ {id:'spot2',pc:'pc2',seal:'午',name:'颐和路十二片区',time:'午时 · 日午',
+  txt:'梧桐荫下，公馆的墙一年比一年旧。\n背包里那把刻“京话”的钥匙——也许能开这里某一扇门。\n联动：颐和路文创馆 · 凭本页面出示，盖章明信片一份。'},
+ {id:'spot3',pc:'pc3',seal:'申',name:'阅江楼',time:'申时 · 日仄',
+  txt:'登楼望长江，风还是那年冬天的风。\n联动：阅江楼景区 · 凭本页面出示，领取纪念章一枚。'},
+ {id:'spot4',pc:'pc4',seal:'戌',name:'先锋书店五台山店',time:'戌时 · 夜',
+  txt:'柜台后的小姑娘十六岁，如今书已经排满了三层。\n第三排书架第三格——她放信的地方。\n联动：先锋文创 · 凭本页面出示，满 50 减 8 元。'}
+];
+var card=document.getElementById('card');
+var cardOn=null;
+var visited={};
+var toastEl=document.getElementById('toast');
+function toast(msg){
+  toastEl.textContent=msg;
+  toastEl.classList.add('on');
+  setTimeout(function(){toastEl.classList.remove('on');},2200);
+}
+function getImg(key){
+  var im=document.querySelector('.imgpool img[data-im="'+key+'"]');
+  return im?im.getAttribute('src'):'';
+}
+function showCard(p,i){
+  var el=document.getElementById(p.id);
+  el.classList.add('on');
+  document.getElementById('cardSeal').textContent=p.seal;
+  document.getElementById('cardName').textContent=p.name;
+  document.getElementById('cardTime').textContent=p.time;
+  document.getElementById('cardTxt').innerHTML=p.txt.replace(/\n/g,'<br>');
+  card.classList.add('on');
+  cardOn=p;
+  /* 记录已访问点位 → 五个都看过后亮起今昔对比入口 */
+  visited[p.id]=true;
+  var all=['spot0','spot1','spot2','spot3','spot4'].every(function(id){return !!visited[id];});
+  if(all){
+    var b=document.getElementById('cmpBtn');
+    if(b)b.classList.add('on');
+  }
+}
+POINTS.forEach(function(p,i){
+  document.getElementById(p.id).addEventListener('click',function(){showCard(p,i);});
+  var pc=document.getElementById(p.pc);
+  if(pc){
+    pc.addEventListener('click',function(){
+      if(pc.classList.contains('blank')){
+        var short=(p.pc==='pc3')?'阅江楼':((p.pc==='pc4')?'先锋书店':p.name);
+        toast('先去地图上找到'+short);
+      }else{
+        showCard(p,i);
+      }
+    });
+  }
+});
+document.getElementById('cardClose').addEventListener('click',function(){
+  card.classList.remove('on');
+  if(cardOn)document.getElementById(cardOn.id).classList.remove('on');
+  cardOn=null;
+});
+/* 今昔对比入口 */
+document.getElementById('cmpBtn').addEventListener('click',function(){
+  window.location.href='第五幕-今昔对比.html';
+});
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script>
+<script>
+(function(){
+var tri=document.getElementById('bagTri');if(!tri)return;
+var panel=document.getElementById('bagPanel');if(!panel)return;
+tri.addEventListener('click',function(e){e.stopPropagation();panel.classList.toggle('on');});
+var items=['出门地图', '五处点位'];
+var row=panel.querySelector('.row');
+items.forEach(function(nm){
+  var d=document.createElement('div');d.className='slot';d.textContent=nm;row.appendChild(d);
+});
+document.addEventListener('click',function(e){
+  if(!panel.classList.contains('on'))return;
+  if(!panel.contains(e.target)&&!tri.contains(e.target))panel.classList.remove('on');
+});
+})();
+</script>
+
+</body>
+</html>

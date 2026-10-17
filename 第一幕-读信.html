@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第一幕 · 读信</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:#1a1510;color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{
+  position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:#1a1510;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);
+  overflow:hidden;opacity:1;animation:stageIn .7s ease-out;
+}
+@keyframes stageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.bed-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.warm{position:absolute;z-index:3;inset:0;pointer-events:none;
+  background:radial-gradient(42% 34% at 78% 22%,rgba(255,216,150,.22),transparent 70%),
+             linear-gradient(180deg,rgba(30,22,14,.10) 0%,transparent 30%,rgba(24,16,9,.42) 100%)}
+
+/* ============ 左上日晷 ============ */
+.sundial{position:absolute;z-index:30;left:clamp(14px,2.4vmin,26px);top:clamp(12px,2.1vmin,22px);
+  width:clamp(34px,4.6vmin,50px);height:clamp(34px,4.6vmin,50px);cursor:pointer;border:0;background:none;padding:0;
+  opacity:0;transition:opacity .5s;pointer-events:none}
+.sundial.show{opacity:.98;pointer-events:auto}
+.sundial svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}
+.sundial .glow-ring{animation:goldGlow 2.4s ease-in-out infinite}
+@keyframes goldGlow{0%,100%{opacity:.35}50%{opacity:.85}}
+
+/* ============ 全屏日晷（开场动画） ============ */
+.sundial-full{position:absolute;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(90% 90% at 50% 50%,rgba(24,30,25,.84),rgba(6,9,8,.96))}
+.sundial-full.on{display:flex}
+.dial{position:relative;width:clamp(280px,60vmin,660px);aspect-ratio:1/1;filter:drop-shadow(0 24px 60px rgba(0,0,0,.6))}
+.dial svg{width:100%;height:100%;display:block;overflow:visible}
+.dial-note{position:absolute;left:0;right:0;bottom:-13%;text-align:center;pointer-events:none;
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(15px,2.6vmin,26px);color:#cfc3a0;
+  letter-spacing:.15em;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.dial-zone{position:absolute;width:31%;aspect-ratio:1/1;cursor:pointer;border-radius:50%;transform:translate(-50%,-50%)}
+.dial-zone:hover{background:radial-gradient(circle,rgba(230,200,130,.22),transparent 70%)}
+
+/* ============ 顶部小字 ============ */
+.place-tag{position:absolute;z-index:20;left:clamp(16px,3vmin,30px);top:clamp(13px,2.3vmin,24px);pointer-events:none;
+  font-size:clamp(11px,1.7vmin,16px);color:#d8c9a6;letter-spacing:.24em;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+
+/* ============ 信纸 ============ */
+.letter-wrap{position:absolute;z-index:15;left:50%;top:53%;width:clamp(300px,56vmin,620px);
+  height:clamp(210px,40vmin,440px);transform:translate(-50%,-50%);opacity:0;transition:opacity .8s}
+.letter-wrap.show{opacity:1}
+.letter{position:relative;width:100%;height:100%;border-radius:clamp(6px,1.2vmin,12px);overflow:hidden;
+  background:radial-gradient(130% 120% at 50% 30%,#f3ead2 0%,#e4d7b6 60%,#cdbb92 100%);
+  box-shadow:0 22px 50px rgba(0,0,0,.5),inset 0 0 40px rgba(120,100,60,.18);
+  padding:clamp(14px,2.6vmin,28px) clamp(18px,3.4vmin,36px);
+  border:1px solid rgba(170,145,95,.4)}
+.letter::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(90% 80% at 18% 12%,rgba(150,120,70,.12),transparent 55%),
+             radial-gradient(70% 60% at 82% 88%,rgba(110,90,55,.10),transparent 60%)}
+.letter-scroll{position:relative;width:100%;height:100%;overflow-x:hidden;overflow-y:auto;
+  scrollbar-width:none;-ms-overflow-style:none}
+.letter-scroll::-webkit-scrollbar{display:none}
+.letter-text{position:relative;display:inline-block;height:100%;
+  font-family:"Ma Shan Zheng","Kaiti SC","STKaiti",cursive;
+  font-size:clamp(17px,3vmin,30px);line-height:2;color:#3d3224;
+  letter-spacing:.1em;white-space:pre-wrap;padding:clamp(12px,2.4vmin,26px) clamp(10px,2vmin,22px)}
+.scroll-hint{position:absolute;z-index:16;left:50%;top:74%;transform:translateX(-50%);opacity:0;
+  pointer-events:none;font-size:clamp(11px,1.6vmin,15px);color:#a89670;letter-spacing:.2em;
+  text-shadow:0 1px 3px rgba(0,0,0,.4);transition:opacity .5s}
+.scroll-hint.show{opacity:.85;animation:hintFloat 1.8s ease-in-out infinite}
+@keyframes hintFloat{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-5px)}}
+
+/* ============ 旁白（打字机） ============ */
+.narration{position:absolute;z-index:21;left:0;right:0;bottom:15%;text-align:center;pointer-events:none;
+  font-family:"Courier New",monospace,"Noto Serif SC",serif;
+  font-size:clamp(13px,2.1vmin,21px);letter-spacing:.06em;color:#f7efda;
+  text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 14px rgba(0,0,0,.35);min-height:2.6em;line-height:1.7;
+  padding:0 clamp(30px,8vmin,120px)}
+.caret{display:inline-block;width:.5em;height:1em;vertical-align:-.12em;margin-left:.06em;
+  background:#e8d5a2;animation:blink 1s steps(2) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* ============ 黑场开场：打字机旁白 ============ */
+.blackout{position:absolute;inset:0;z-index:70;background:#000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .9s ease}
+.blackout.show{opacity:1;pointer-events:auto}
+.blackout.fade{opacity:0}
+.bo-text{max-width:88%;text-align:center;font-family:"Courier New",monospace,"Noto Serif SC",serif;
+  font-size:clamp(15px,2.4vmin,24px);line-height:2.1;letter-spacing:.08em;color:#f2e6c8;
+  text-shadow:0 0 16px rgba(230,200,130,.16)}
+.bo-caret{display:inline-block;width:.5em;height:1em;vertical-align:-.12em;margin-left:.06em;
+  background:#e8d5a2;animation:blink 1s steps(2) infinite}
+
+/* ============ 题1入口 ============ */
+.quiz-entry{position:absolute;z-index:25;left:50%;bottom:24.5%;transform:translate(-50%,0) scale(.9);opacity:0;
+  pointer-events:none;cursor:pointer;text-align:center;transition:opacity .6s,transform .6s;
+  background:rgba(20,14,8,.92);border:1px solid rgba(217,163,92,.6);color:#f6ecd4;
+  padding:.7em 1.4em;border-radius:10px;font-size:clamp(13px,2vmin,19px);letter-spacing:.1em;
+  box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.quiz-entry.show{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto}
+.quiz-entry:hover{border-color:#ffd98a;box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 24px rgba(255,200,120,.2)}
+.quiz-entry em{font-style:normal;color:#d9a35c;font-weight:700;letter-spacing:.18em}
+
+/* ============ 底部三角 ============ */
+.tri-btn{position:absolute;z-index:36;left:46.3%;bottom:clamp(6px,1.1vmin,12px);width:7.4%;height:5.2%;
+  min-width:52px;min-height:30px;border:0;background:transparent;cursor:pointer;padding:0;opacity:.92;transition:opacity .6s}
+.tri-btn:hover{opacity:1}
+.tri-btn svg{width:100%;height:100%;display:block;overflow:visible}
+.scrim{position:absolute;inset:0;z-index:40;background:rgba(10,7,4,.55);opacity:0;pointer-events:none;transition:opacity .35s}
+.scrim.on{opacity:1;pointer-events:auto}
+.inventory-panel{position:absolute;left:0;right:0;bottom:0;z-index:41;transform:translateY(103%);
+  transition:transform .48s cubic-bezier(.22,.9,.3,1);
+  background:linear-gradient(180deg,rgba(56,40,22,.97),rgba(32,22,12,.98) 45%,rgba(18,12,6,.99));
+  border-top:1px solid rgba(217,163,92,.42);box-shadow:0 -14px 44px rgba(0,0,0,.55);
+  padding:clamp(10px,1.6vmin,18px) clamp(12px,2.6vmin,30px) clamp(16px,2.8vmin,30px)}
+.inventory-panel.open{transform:translateY(0)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(10px,1.5vmin,16px)}
+.panel-title{font-size:clamp(13px,2.1vmin,19px);font-weight:600;color:#f2dcaa;letter-spacing:.1em}
+.panel-title em{font-style:normal;font-size:.72em;color:#a8986f;letter-spacing:.05em}
+.panel-close{background:none;border:0;color:#d9b97f;font-size:clamp(16px,2.6vmin,24px);line-height:1;cursor:pointer;padding:4px 6px}
+.item-grid{display:flex;gap:clamp(8px,1.5vmin,16px);justify-content:center}
+.item-slot{position:relative;width:clamp(52px,8.2vmin,92px);aspect-ratio:1/1;border:1px solid rgba(255,214,140,.8);
+  border-radius:9px;background:rgba(50,36,18,.65);display:flex;align-items:center;justify-content:center;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,190,110,.18),0 0 14px rgba(255,190,110,.16)}
+.item-slot img{width:86%;height:86%;object-fit:contain;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.slot-name{position:absolute;left:50%;bottom:-1.35em;transform:translateX(-50%);
+  font-size:clamp(10px,1.35vmin,13px);color:#e9dab8;white-space:nowrap;opacity:.9;letter-spacing:.04em}
+
+.fade-out{transition:opacity .5s ease !important;opacity:0 !important}
+@media (prefers-reduced-motion:reduce){.dial-zone,.sundial .glow-ring{animation:none}}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page" id="page">
+  <div class="stage" id="stage">
+    <img class="bed-bg" src="assets/bed-head.png" alt="民宿床头">
+    <div class="warm" aria-hidden="true"></div>
+
+    <!-- 左上日晷（卯时） -->
+    <button class="sundial" id="sundialBtn" aria-label="日晷">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="bronze" cx="38%" cy="32%" r="75%">
+            <stop offset="0%" stop-color="#8f9a82"/><stop offset="55%" stop-color="#5d6f5e"/><stop offset="100%" stop-color="#35442f"/>
+          </radialGradient>
+          <radialGradient id="rim" cx="45%" cy="38%" r="80%">
+            <stop offset="0%" stop-color="#a8b295"/><stop offset="100%" stop-color="#46523c"/>
+          </radialGradient>
+        </defs>
+        <circle class="glow-ring" cx="50" cy="50" r="49" fill="none" stroke="#ffd98a" stroke-width="2.5"/>
+        <circle cx="50" cy="50" r="46" fill="url(#rim)"/>
+        <circle cx="50" cy="50" r="40" fill="url(#bronze)"/>
+        <g stroke="#caa86a" stroke-width="1.6" opacity=".85">
+          <line x1="50" y1="12" x2="50" y2="20"/><line x1="50" y1="80" x2="50" y2="88"/>
+          <line x1="12" y1="50" x2="20" y2="50"/><line x1="80" y1="50" x2="88" y2="50"/>
+          <line x1="23" y1="23" x2="28.5" y2="28.5"/><line x1="71.5" y1="71.5" x2="77" y2="77"/>
+          <line x1="77" y1="23" x2="71.5" y2="28.5"/><line x1="28.5" y1="71.5" x2="23" y2="77"/>
+        </g>
+        <!-- 晷针：卯时 90° -->
+        <g class="mini-hand" transform="rotate(90 50 50)">
+          <path d="M50 54 L47.6 20 L52.4 20 Z" fill="#d8b064"/>
+          <line x1="50" y1="56" x2="50" y2="70" stroke="#a5874e" stroke-width="1.4"/>
+        </g>
+        <circle cx="50" cy="50" r="2.6" fill="#c9a75f"/>
+      </svg>
+    </button>
+
+    <!-- 民宿 · 床头 -->
+    <div class="place-tag">民宿 · 床头</div>
+
+    <!-- 信纸 -->
+    <div class="letter-wrap" id="letterWrap">
+      <div class="letter">
+        <div class="letter-scroll" id="letterScroll">
+          <div class="letter-text" id="letterText">守和先生：
+
+南京又下雨了。院墙先湿了，然后才是街。今天路过鼓楼，卖糖粥的阿婆问我：怎么一个人来。我说，我在等一个人。
+
+等一个人，原来是这样等的——把想说的话写好，又怕寄出去。
+
+<span class="bq bq-l">《</span>京话<span class="bq bq-r">》</span>的样书印好了。我包了两层油纸，想着，若是你赶不及来取，就留给以后会来的人。
+
+一九四九年，一月十九日，夜。
+
+颖</div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint" id="scrollHint">↓ 向下滑动读信</div>
+
+    <!-- 题1入口 -->
+    <button class="quiz-entry" id="quizEntry"><em>三张旧明信片的背面，画着钟</em> · 题一 →</button>
+
+    <!-- 底部三角 -->
+    <button class="tri-btn" id="invBtn" aria-label="打开背包">
+      <svg viewBox="0 0 100 60">
+        <path d="M12 6 L88 6 L50 52 Z" fill="rgba(52,34,16,.92)" stroke="#d9a35c" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M50 14 L62 34 L38 34 Z" fill="#d9a35c" opacity=".9"/>
+      </svg>
+    </button>
+
+    <!-- 背包面板 -->
+    <div class="scrim" id="scrim"></div>
+    <div class="inventory-panel" id="panel">
+      <div class="panel-head">
+        <div class="panel-title">背包<em> · 外婆的旧物</em></div>
+        <button class="panel-close" id="panelClose" aria-label="关闭背包">×</button>
+      </div>
+      <div class="item-grid" id="itemGrid">
+        <div class="item-slot"><img src="assets/item-letter.png" alt="信"><span class="slot-name">信</span></div>
+        <div class="item-slot"><img src="assets/item-postcard.png" alt="明信片"><span class="slot-name">明信片</span></div>
+        <div class="item-slot"><img src="assets/item-key.png" alt="钥匙"><span class="slot-name">钥匙</span></div>
+        <div class="item-slot"><img src="assets/item-photo.png" alt="照片"><span class="slot-name">照片</span></div>
+        <div class="item-slot"><img src="assets/item-receipt.png" alt="小票"><span class="slot-name">小票</span></div>
+        <div class="item-slot"><img src="assets/item-book.png" alt="样书"><span class="slot-name">样书</span></div>
+      </div>
+    </div>
+
+    <!-- 全屏日晷 -->
+    <div class="sundial-full" id="sundialFull">
+      <div class="dial" id="dial">
+        <svg id="dialSvg" viewBox="0 0 400 400"></svg>
+        <div class="dial-note">你拨到哪一天，就看见哪一天。</div>
+      </div>
+    </div>
+
+    <!-- 黑场开场：先打出旁白，再切进页面 -->
+    <div class="blackout" id="blackout">
+      <p class="bo-text"><span id="boText"></span><span class="bo-caret" id="boCaret"></span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var DIZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var curHour=2; /* 卯时 */
+
+var actx=(window.AudioContext||window.webkitAudioContext)?new (window.AudioContext||window.webkitAudioContext)():null;
+function blip(freq,dur,type,vol,when){
+  if(!actx)return;
+  var t=actx.currentTime+(when||0);
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'square';o.frequency.value=freq;
+  g.gain.setValueAtTime(vol||.12,t);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g);g.connect(actx.destination);
+  o.start(t);o.stop(t+dur+.02);
+}
+function keyClick(){if(window.__sfx)window.__sfx.key();}
+function clack(){if(window.__sfx)window.__sfx.carriage();}
+function paperRustle(){blip(120,.22,'sine',.05);blip(90,.28,'sine',.04,.18);}
+
+/* ============ 背包 ============ */
+var itemGrid=document.getElementById('itemGrid');
+var panel=document.getElementById('panel'),scrim=document.getElementById('scrim'),
+    panelClose=document.getElementById('panelClose'),invBtn=document.getElementById('invBtn');
+function openInv(force){
+  var willOpen=(typeof force==='boolean')?force:!panel.classList.contains('open');
+  panel.classList.toggle('open',willOpen);
+  scrim.classList.toggle('on',willOpen);
+}
+invBtn.addEventListener('click',function(e){e.stopPropagation();openInv();});
+scrim.addEventListener('click',function(){openInv(false);});
+panelClose.addEventListener('click',function(){openInv(false);});
+
+/* ============ 全屏日晷 ============ */
+var dialSvg=document.getElementById('dialSvg'),sundialFull=document.getElementById('sundialFull'),
+    dial=document.getElementById('dial');
+function drawDial(){
+  var s='<defs><radialGradient id="dbronze" cx="40%" cy="34%" r="80%"><stop offset="0%" stop-color="#98a38a"/><stop offset="55%" stop-color="#5e705c"/><stop offset="100%" stop-color="#2f3d2b"/></radialGradient>';
+  s+='<radialGradient id="drim" cx="44%" cy="38%" r="82%"><stop offset="0%" stop-color="#b3bda0"/><stop offset="100%" stop-color="#3f4c36"/></radialGradient></defs>';
+  s+='<circle cx="200" cy="200" r="192" fill="url(#drim)"/><circle cx="200" cy="200" r="176" fill="url(#dbronze)"/>';
+  for(var i=0;i<12;i++){
+    var a=i*30;
+    s+='<line x1="'+(200+Math.sin(a*Math.PI/180)*158).toFixed(1)+'" y1="'+(200-Math.cos(a*Math.PI/180)*158).toFixed(1)+'" x2="'+(200+Math.sin(a*Math.PI/180)*172).toFixed(1)+'" y2="'+(200-Math.cos(a*Math.PI/180)*172).toFixed(1)+'" stroke="#c9a86a" stroke-width="2" opacity=".85"/>';
+    s+='<text x="'+(200+Math.sin(a*Math.PI/180)*186).toFixed(1)+'" y="'+(200-Math.cos(a*Math.PI/180)*186+7).toFixed(1)+'" font-size="20" fill="#e2d3a8" text-anchor="middle" font-family="Noto Serif SC,serif">'+DIZHI[i]+'</text>';
+  }
+  for(var j=0;j<48;j++){
+    var aa=j*7.5;
+    var r3=140,r4=j%4===0?150:145;
+    s+='<line x1="'+(200+Math.sin(aa*Math.PI/180)*r3).toFixed(1)+'" y1="'+(200-Math.cos(aa*Math.PI/180)*r3).toFixed(1)+'" x2="'+(200+Math.sin(aa*Math.PI/180)*r4).toFixed(1)+'" y2="'+(200-Math.cos(aa*Math.PI/180)*r4).toFixed(1)+'" stroke="#8a977e" stroke-width="'+(j%4===0?2.4:1)+'" opacity=".7"/>';
+  }
+  s+='<g font-size="12" fill="#b9c0a6" text-anchor="middle"><text x="200" y="128">民国三十八年</text><text x="200" y="282">公元二〇二六</text></g>';
+  s+='<path class="crack" d="M200 62 L196 88 L202 104 L194 130 L200 150 L196 172 L203 190 L197 214" fill="none" stroke="#1f2a1d" stroke-width="1.6" opacity=".7"/>';
+  s+='<g class="big-hand" transform="rotate('+(curHour*30)+' 200 200)"><path d="M200 214 L195 66 L205 66 Z" fill="#d9b264"/><line x1="200" y1="216" x2="200" y2="236" stroke="#a5874e" stroke-width="3"/></g>';
+  s+='<circle cx="200" cy="200" r="6" fill="#c9a75f"/>';
+  dialSvg.innerHTML=s;
+  /* 点击区（只读展示：点盘外收回） */
+  for(var k=0;k<12;k++){
+    var ak=k*30;
+    var x=200+Math.sin(ak*Math.PI/180)*150, y=200-Math.cos(ak*Math.PI/180)*150;
+    var z=document.createElement('div');
+    z.className='dial-zone';z.style.left=(x/4)+'%';z.style.top=(y/4)+'%';
+    z.addEventListener('click',function(e){e.stopPropagation();clack();});
+    dial.appendChild(z);
+  }
+}
+var sundialBtn=document.getElementById('sundialBtn');
+sundialFull.addEventListener('click',function(e){
+  if(e.target===sundialFull){sundialFull.classList.remove('on');}
+});
+sundialBtn.addEventListener('click',function(){
+  dial.innerHTML='<svg id="dialSvg" viewBox="0 0 400 400"></svg><div class="dial-note">你拨到哪一天，就看见哪一天。</div>';
+  dialSvg=document.getElementById('dialSvg');
+  drawDial();
+  sundialFull.classList.add('on');
+  clack();
+});
+
+/* ============ 开场：全屏日晷自动拨到卯时 ============ */
+var letterWrap=document.getElementById('letterWrap');
+var scrollHint=document.getElementById('scrollHint');
+var letterScroll=document.getElementById('letterScroll');
+var quizEntry=document.getElementById('quizEntry');
+var sundialEl=document.getElementById('sundialBtn');
+var entryShown=false;
+
+function openIntroDial(){
+  dial.innerHTML='<svg id="dialSvg" viewBox="0 0 400 400"></svg><div class="dial-note">你拨到哪一天，就看见哪一天。</div>';
+  dialSvg=document.getElementById('dialSvg');
+  drawDial();
+  sundialFull.classList.add('on');
+  /* 指针从亥(330°) 拨到 卯(90°)，走最短路径 330→90 = 顺时针转120° */
+  var hand=dialSvg.querySelector('.big-hand');
+  hand.style.transition='transform 1.6s cubic-bezier(.3,.1,.2,1)';
+  hand.setAttribute('transform','rotate(90 200 200)');
+  clack();
+  setTimeout(function(){
+    /* 收回小图标 */
+    sundialFull.classList.remove('on');
+    sundialEl.classList.add('show');
+    beginRead();
+  },2600);
+}
+function typeLine(text,el,done){
+  var t=el;
+  t.textContent='';
+  var i=0;
+  (function step(){
+    if(i<text.length){
+      t.textContent+=text.charAt(i);
+      i++;keyClick();
+      setTimeout(step,42+Math.random()*50);
+    }else{
+      if(done)done();
+    }
+  })();
+}
+var NARRATION='1947年起，我给上海《论语》写了一个专栏——不写时局，只写南京的碎：梅雨季浸透院墙的雨、鼓楼街边温热的糖粥、使馆区梧桐簌簌落下的声响。写信的人，叫姚颖。';
+function beginRead(){
+  letterWrap.classList.add('show');
+  scrollHint.classList.add('show');
+  paperRustle();
+  /* 旁白已在黑场打过，页面内不再重复展示 */
+}
+/* 黑场开场：先打出旁白，再切进页面 */
+function startBlackout(){
+  var blackout=document.getElementById('blackout'),
+      boText=document.getElementById('boText'),
+      boCaret=document.getElementById('boCaret');
+  blackout.classList.add('show');
+  typeLine(NARRATION,boText,function(){
+    boCaret.style.display='none';
+    setTimeout(function(){
+      blackout.classList.add('fade');
+      setTimeout(function(){
+        /* 彻底移除黑场层，避免透明合成层残留 */
+        blackout.classList.remove('show');
+        blackout.style.display='none';
+        openIntroDial();
+      },950);
+    },900);
+  });
+}
+/* 读完判定：滚动到底 或 12s 兜底 */
+function checkRead(){
+  if(entryShown)return;
+  var sc=letterScroll;
+  var done=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-30;
+  if(done){entryShown=true;quizEntry.classList.add('show');}
+}
+letterScroll.addEventListener('scroll',function(){
+  scrollHint.classList.remove('show');
+  checkRead();
+});
+quizEntry.addEventListener('click',function(){
+  if(!entryShown)return;
+  document.getElementById('page').classList.add('fade-out');
+  setTimeout(function(){window.location.href='第一幕-题1-摩斯码.html';},520);
+});
+
+startBlackout();
+setTimeout(function(){checkRead();},16000);
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>

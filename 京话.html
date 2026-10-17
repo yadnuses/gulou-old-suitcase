@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>京话</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:radial-gradient(130% 100% at 50% 8%,#2a2f3d 0%,#191c26 55%,#0b0d13 100%);
+  color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.stage{
+  position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:#0b0d13;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07);
+  overflow:hidden;animation:stageIn .7s ease-out both;
+}
+@keyframes stageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.cover-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(115% 105% at 50% 42%,transparent 52%,rgba(10,8,14,.38) 100%),
+             linear-gradient(180deg,rgba(8,6,12,.28) 0%,transparent 30%,transparent 72%,rgba(8,6,12,.42) 100%)}
+
+/* 漂浮旧物装饰层 */
+.float-item{position:absolute;z-index:3;pointer-events:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));opacity:.92}
+.float-letter{left:9%;top:52%;width:clamp(96px,13.5vmin,150px);animation:driftB 11s ease-in-out infinite}
+@keyframes driftA{
+  0%,100%{transform:translate(0,0) rotate(-4deg)}
+  33%{transform:translate(-16px,14px) rotate(-2deg)}
+  66%{transform:translate(-8px,-18px) rotate(-7deg)}
+}
+@keyframes driftB{
+  0%,100%{transform:translate(0,0) rotate(6deg)}
+  40%{transform:translate(18px,-12px) rotate(3deg)}
+  75%{transform:translate(8px,16px) rotate(9deg)}
+}
+
+/* 光尘 */
+.dust{position:absolute;z-index:4;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#ffe9b8 0%,rgba(224,169,79,.25) 70%);opacity:0;
+  animation:spark var(--d) ease-in-out var(--dl) infinite}
+@keyframes spark{0%,100%{opacity:0;transform:translate(0,0) scale(.6)}50%{opacity:.85;transform:translate(var(--dx),var(--dy)) scale(1)}}
+
+/* 标题区 */
+.title-zone{position:absolute;z-index:6;left:0;right:0;top:29%;text-align:center;pointer-events:none}
+.lead-text{
+  font-family:"Kaiti SC","STKaiti","KaiTi","Noto Serif SC",serif;
+  font-size:clamp(20px,3.4vmin,38px);font-weight:600;letter-spacing:.62em;text-indent:.62em;
+  color:rgba(242,231,207,.88);
+  text-shadow:0 1px 3px rgba(30,15,0,.55);
+  animation:subIn 1.6s ease .35s both;
+}
+.game-title{
+  margin-top:clamp(8px,1.4vmin,16px);
+  font-family:"Kaiti SC","STKaiti","KaiTi","Noto Serif SC",serif;
+  font-size:clamp(88px,17.5vmin,198px);font-weight:900;letter-spacing:.16em;text-indent:.16em;
+  color:#f7e6bd;
+  text-shadow:0 2px 4px rgba(20,10,0,.55),0 0 26px rgba(255,205,120,.5),0 0 64px rgba(255,185,90,.3);
+  animation:titleFloat 3.6s ease-in-out infinite,titleBreath 3.6s ease-in-out infinite;
+  will-change:transform,text-shadow;
+}
+@keyframes titleFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-11px)}
+}
+@keyframes titleBreath{
+  0%,100%{text-shadow:0 2px 4px rgba(20,10,0,.55),0 0 26px rgba(255,205,120,.5),0 0 64px rgba(255,185,90,.3)}
+  50%{text-shadow:0 4px 8px rgba(20,10,0,.6),0 0 42px rgba(255,214,130,.66),0 0 96px rgba(255,190,95,.4)}
+}
+@keyframes subIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* 底部进入提示 */
+.enter-hint{position:absolute;z-index:6;left:0;right:0;bottom:6.5%;text-align:center;pointer-events:none;
+  font-size:clamp(12px,1.8vmin,17px);letter-spacing:.34em;text-indent:.34em;color:rgba(242,231,207,.72);
+  text-shadow:0 1px 3px rgba(0,0,0,.5);animation:hintPulse 2.8s ease-in-out infinite}
+@keyframes hintPulse{0%,100%{opacity:.55}50%{opacity:1}}
+.enter-hint::before{content:"·";margin-right:.6em;color:#d9a35c}
+.enter-hint::after{content:"·";margin-left:.6em;color:#d9a35c}
+
+/* 帧/角标装饰 */
+.corner{position:absolute;z-index:5;width:clamp(34px,5vmin,56px);height:clamp(34px,5vmin,56px);
+  border:1px solid rgba(217,163,92,.5);pointer-events:none}
+.corner.tl{top:3.4%;left:3.4%;border-right:0;border-bottom:0}
+.corner.tr{top:3.4%;right:3.4%;border-left:0;border-bottom:0}
+.corner.bl{bottom:3.4%;left:3.4%;border-right:0;border-top:0}
+.corner.br{bottom:3.4%;right:3.4%;border-left:0;border-top:0}
+
+@media (prefers-reduced-motion:reduce){
+  .game-title,.enter-hint,.float-item,.dust,.stage{animation:none}
+}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page" id="page" role="link" tabindex="0" aria-label="点击进入游戏：外婆的旧皮箱">
+  <div class="stage">
+    <img class="cover-bg" src="assets/cover-bg.png" alt="黄昏下的南京鼓楼与街巷">
+    <div class="vignette" aria-hidden="true"></div>
+
+    <img class="float-item float-letter" src="assets/cover-letter.png" alt="" aria-hidden="true">
+
+    <div class="title-zone">
+      <div class="lead-text">未寄出的</div>
+      <div class="game-title">京话</div>
+    </div>
+
+    <div class="corner tl" aria-hidden="true"></div>
+    <div class="corner tr" aria-hidden="true"></div>
+    <div class="corner bl" aria-hidden="true"></div>
+    <div class="corner br" aria-hidden="true"></div>
+
+    <div class="enter-hint">轻触页面，进入外婆的旧皮箱</div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+// 光尘
+var stage=document.querySelector('.stage');
+for(var i=0;i<16;i++){
+  var d=document.createElement('span');
+  d.className='dust';
+  var s=2+Math.random()*4;
+  d.style.width=s+'px';d.style.height=s+'px';
+  d.style.left=(8+Math.random()*84)+'%';
+  d.style.top=(10+Math.random()*80)+'%';
+  d.style.setProperty('--dx',(Math.random()*60-30)+'px');
+  d.style.setProperty('--dy',(Math.random()*50-25)+'px');
+  d.style.setProperty('--d',(4+Math.random()*4)+'s');
+  d.style.setProperty('--dl',(Math.random()*4)+'s');
+  stage.appendChild(d);
+}
+// 点击进入
+var page=document.getElementById('page');
+function enter(){
+  page.style.transition='opacity .45s ease';
+  page.style.opacity='0';
+  setTimeout(function(){window.location.href='外婆的旧皮箱.html';},450);
+}
+page.addEventListener('click',enter);
+page.addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();enter();}
+});
+// 提示键盘可点击
+page.focus();
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>

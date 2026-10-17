@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>题2 · 颐和路选楼</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:#0a0805;color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:radial-gradient(120% 100% at 50% 8%,#2e2620 0%,#18130e 55%,#0a0805 100%);
+  box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;
+  animation:stageIn .7s ease-out both}
+@keyframes stageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+/* 背景：老照片拼贴墙 */
+.bg{position:absolute;inset:0;
+  background:url(assets/p7-bg-street.jpg) center/cover no-repeat;
+  filter:sepia(.5) contrast(.82) brightness(.52) blur(1px);transform:scale(1.05)}
+.bg-tint{position:absolute;inset:0;z-index:1;
+  background:radial-gradient(110% 100% at 50% 42%,rgba(24,16,8,.55) 0%,rgba(14,9,4,.82) 100%),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 2px,transparent 2px 6px)}
+.wall-dot{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(240,230,205,.1) 1px,transparent 1.5px);
+  background-size:26px 26px}
+.vig{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(180deg,rgba(12,8,4,.5) 0%,rgba(12,8,4,0) 24%,rgba(12,8,4,.08) 55%,rgba(10,7,3,.5) 100%),
+  radial-gradient(120% 120% at 50% 42%,transparent 60%,rgba(8,5,2,.55) 100%)}
+/* 墙上散贴的做旧小照片 */
+.wall-photo{position:absolute;z-index:2;pointer-events:none;opacity:.32;filter:sepia(.75) contrast(.8) brightness(.6)}
+.wall-photo img{width:100%;height:100%;object-fit:cover;filter:sepia(.7) contrast(.85) brightness(.7)}
+.wp1{width:clamp(90px,14vmin,170px);aspect-ratio:3/2;left:4%;top:9%;rotate:-6deg}
+.wp2{width:clamp(90px,14vmin,170px);aspect-ratio:4/3;right:5%;top:12%;rotate:5deg}
+.wp3{width:clamp(80px,12vmin,150px);aspect-ratio:3/2;left:8%;bottom:16%;rotate:4deg}
+.wp4{width:clamp(80px,12vmin,150px);aspect-ratio:4/3;right:7%;bottom:13%;rotate:-5deg}
+/* ============ 左上日晷 ============ */
+.dial-btn{position:absolute;z-index:20;left:2vmin;top:2vmin;width:clamp(54px,8.4vmin,88px);
+  aspect-ratio:1;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));
+  transition:transform .25s ease,filter .4s}
+.dial-btn:hover{transform:scale(1.06) rotate(6deg)}
+.dial-btn svg{width:100%;height:100%}
+.dial-full{position:absolute;inset:0;z-index:60;background:rgba(6,4,2,.78);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:2.6vmin}
+.dial-full.on{display:flex;animation:fadeIn .4s ease-out}
+.dial-full .big{width:clamp(230px,34vmin,360px);aspect-ratio:1;animation:dropIn .65s cubic-bezier(.2,1.4,.4,1) both}
+.dial-full .cap{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(19px,3vmin,30px);
+  color:#e9d9a8;letter-spacing:.3em;text-indent:.3em;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.dial-full .sub{font-size:clamp(11px,1.6vmin,15px);color:#b9a376;letter-spacing:.22em;text-indent:.22em}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes dropIn{from{opacity:0;transform:scale(.7) translateY(-24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+/* ============ 中上：专栏摘抄 ============ */
+.quote{position:absolute;z-index:10;left:50%;top:3.4vmin;transform:translateX(-50%);
+  text-align:center;pointer-events:none}
+.quote .txt{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(17px,3vmin,34px);
+  color:#efe0b4;letter-spacing:.14em;text-indent:.14em;text-shadow:0 2px 12px rgba(0,0,0,.85),0 0 24px rgba(217,163,92,.2);
+  white-space:nowrap}
+.quote .cap{display:block;margin-top:clamp(3px,.8vmin,8px);font-size:clamp(10px,1.5vmin,14px);
+  color:#b9a376;letter-spacing:.26em;text-indent:.26em;opacity:.85}
+/* ============ 中央：2×2 老照片 ============ */
+.grid{position:absolute;z-index:12;left:50%;top:51%;transform:translate(-50%,-50%);
+  display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.8vmin,34px)}
+.photo{position:relative;width:clamp(150px,26.5vmin,320px);aspect-ratio:4/3;cursor:pointer;
+  background:#efe6cf;padding:clamp(5px,1vmin,10px);box-shadow:0 14px 30px rgba(0,0,0,.5);
+  transition:transform .25s ease,box-shadow .3s}
+.photo:nth-child(odd){rotate:-1.1deg}
+.photo:nth-child(even){rotate:1.4deg}
+.photo:nth-child(3){rotate:.9deg}
+.photo:nth-child(4){rotate:-1.6deg}
+.photo:hover{transform:scale(1.05) translateY(-4px);box-shadow:0 22px 44px rgba(0,0,0,.6)}
+.photo .frame-img{position:absolute;inset:clamp(5px,1vmin,10px);overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:cover;
+  filter:sepia(.62) saturate(.82) contrast(.9) brightness(.86);
+  transition:filter 2s ease,transform .4s ease}
+.photo .grain{position:absolute;inset:clamp(5px,1vmin,10px);pointer-events:none;mix-blend-mode:overlay;
+  background-image:repeating-linear-gradient(45deg,rgba(140,110,60,.06) 0 1px,transparent 1px 3px)}
+.photo .pno{position:absolute;left:50%;bottom:clamp(-1px,-.2vmin,-4px);transform:translateX(-50%);
+  font-size:clamp(8px,1.2vmin,11px);color:#8d7a50;letter-spacing:.1em;background:rgba(255,250,230,.85);
+  padding:1px 8px;border-radius:2px;white-space:nowrap;pointer-events:none}
+.photo .tag{position:absolute;z-index:3;right:-.8vmin;top:-.8vmin;width:clamp(34px,5vmin,54px);aspect-ratio:1;
+  border-radius:50%;background:rgba(24,16,8,.62);border:1px solid rgba(217,163,92,.5);
+  display:none;align-items:center;justify-content:center;font-family:"Ma Shan Zheng","Kaiti SC",cursive;
+  font-size:clamp(11px,1.8vmin,17px);color:#e9d9a8;rotate:8deg}
+.photo.sel .tag{display:flex}
+.photo.wrong{animation:shake .5s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px) rotate(-2deg)}45%{transform:translateX(6px)}70%{transform:translateX(-4px)}90%{transform:translateX(3px)}}
+/* 放大查看 */
+.viewer{position:absolute;inset:0;z-index:50;background:rgba(5,3,1,.78);backdrop-filter:blur(2px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:clamp(10px,2vmin,22px)}
+.viewer.on{display:flex;animation:fadeIn .35s ease-out}
+.viewer .vp{position:relative;width:clamp(280px,42vmin,560px);aspect-ratio:4/3;
+  background:#efe6cf;padding:clamp(6px,1.2vmin,12px);box-shadow:0 30px 70px rgba(0,0,0,.75);
+  animation:mailBig .55s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes mailBig{from{opacity:0;transform:scale(.55) rotate(2deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.viewer .vp img{width:100%;height:100%;object-fit:cover;filter:sepia(.55) saturate(.85) contrast(.92) brightness(.9)}
+.viewer .vp .vtag{position:absolute;left:50%;bottom:-1.6em;transform:translateX(-50%);
+  font-size:clamp(10px,1.6vmin,15px);color:#cbb98a;letter-spacing:.18em;white-space:nowrap}
+.viewer .close{position:absolute;right:7%;top:7%;z-index:5;width:clamp(34px,5vmin,52px);height:clamp(34px,5vmin,52px);
+  border-radius:50%;border:1px solid rgba(201,168,106,.55);background:rgba(20,14,7,.55);color:#dcc98f;
+  font-size:clamp(15px,2.4vmin,24px);line-height:1;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .2s,background .3s}
+.viewer .close:hover{transform:scale(1.12);background:rgba(46,32,15,.75)}
+.viewer .confirm{font-family:"Noto Serif SC",serif;font-size:clamp(13px,2vmin,20px);color:#3a2813;
+  background:linear-gradient(160deg,#e8c98c,#cf9f55);border:1px solid #a87934;border-radius:999px;
+  padding:.5em 1.6em .55em;cursor:pointer;letter-spacing:.26em;text-indent:.26em;
+  box-shadow:0 8px 22px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,240,200,.7);
+  transition:transform .2s,box-shadow .3s}
+.viewer .confirm:hover{transform:translateY(-2px) scale(1.04)}
+/* 答案上色 */
+.photo.ans img{filter:none}
+.photo.ans{box-shadow:0 0 0 3px rgba(217,163,92,.85),0 20px 48px rgba(0,0,0,.55)}
+.photo.ans .tag{display:flex;background:rgba(217,163,92,.92);color:#3a2813;border-color:transparent}
+/* ============ 底部背包 ============ */
+.bag-tri{position:absolute;z-index:30;left:50%;bottom:clamp(4px,1vmin,12px);transform:translateX(-50%);
+  width:clamp(26px,4.2vmin,44px);height:clamp(26px,4.2vmin,44px);cursor:pointer;
+  display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55));
+  transition:transform .2s}
+.bag-tri:hover{transform:translateX(-50%) scale(1.14)}
+.bag-panel{position:absolute;z-index:40;left:50%;bottom:clamp(30px,6.4vmin,74px);transform:translateX(-50%) translateY(10px);
+  width:clamp(360px,64vmin,700px);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+.bag-panel.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.bag-panel .inner{position:relative;background:linear-gradient(160deg,#2a2015,#1a120a 70%);
+  border:1px solid rgba(201,168,106,.38);border-radius:10px;padding:clamp(8px,1.5vmin,14px);
+  box-shadow:0 18px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,240,200,.08)}
+.bag-panel .row{display:flex;gap:clamp(5px,1vmin,10px);justify-content:center;flex-wrap:wrap}
+.slot{position:relative;width:clamp(40px,7.2vmin,68px);aspect-ratio:1;border-radius:8px;
+  border:1px dashed rgba(201,168,106,.4);background:rgba(255,246,220,.04);
+  display:flex;align-items:center;justify-content:center;font-size:clamp(11px,1.7vmin,15px);
+  color:rgba(201,168,106,.5);letter-spacing:.12em;cursor:default}
+.slot.lit{border-style:solid;border-color:rgba(217,163,92,.75);background:rgba(217,163,92,.12);
+  box-shadow:0 0 14px rgba(217,163,92,.3) inset,0 0 8px rgba(217,163,92,.18);color:#e6cf98}
+.slot.map{cursor:pointer}
+.slot.map:hover{border-color:rgba(217,163,92,1);background:rgba(217,163,92,.2)}
+.slot .nm{position:absolute;bottom:-1.2em;left:50%;transform:translateX(-50%);
+  font-size:clamp(8px,1.2vmin,11px);color:#a08c60;letter-spacing:.06em;white-space:nowrap}
+/* 老地图 */
+.map-modal{position:absolute;inset:0;z-index:70;background:rgba(5,3,1,.8);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:2vmin}
+.map-modal.on{display:flex;animation:fadeIn .4s ease-out}
+.map-modal .mapi{position:relative;width:clamp(300px,46vmin,600px);aspect-ratio:16/11;
+  background:linear-gradient(160deg,#e9ddbc,#d8c89c);padding:clamp(14px,2.6vmin,30px);
+  box-shadow:0 30px 70px rgba(0,0,0,.7);rotate:-.6deg;animation:dropIn .6s cubic-bezier(.2,1.3,.4,1) both}
+.map-modal .mapi::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:repeating-linear-gradient(0deg,rgba(150,115,60,.08) 0 2px,transparent 2px 6px)}
+.map-modal .mtitle{font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(13px,2vmin,20px);
+  color:#5b4324;text-align:center;letter-spacing:.16em;margin-bottom:clamp(4px,1vmin,8px)}
+.map-modal .mfoot{margin-top:clamp(4px,1vmin,8px);font-size:clamp(9px,1.4vmin,13px);color:#8d7a50;
+  letter-spacing:.1em;text-align:center;line-height:1.8}
+.map-modal .mclose{position:absolute;right:-1.2em;top:-1.2em;width:clamp(28px,4.4vmin,44px);height:clamp(28px,4.4vmin,44px);
+  border-radius:50%;border:1px solid rgba(201,168,106,.55);background:rgba(20,14,7,.6);color:#dcc98f;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:clamp(13px,2vmin,20px)}
+/* toast */
+.toast{position:absolute;z-index:80;left:50%;top:22%;transform:translateX(-50%);
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(15px,2.6vmin,26px);color:#e9d9a8;
+  letter-spacing:.2em;text-indent:.2em;background:rgba(20,14,7,.72);border:1px solid rgba(201,168,106,.4);
+  padding:.6em 1.4em;border-radius:999px;opacity:0;pointer-events:none;
+  box-shadow:0 10px 28px rgba(0,0,0,.5);transition:opacity .3s;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .photo:hover,.photo img,.stage,.dial-full .big,.map-modal .mapi,.viewer .vp{transition:none!important;animation:none!important}
+}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page" id="page">
+  <div class="stage" id="stage">
+    <div class="bg"></div>
+    <div class="bg-tint"></div>
+    <div class="wall-dot"></div>
+    <div class="vig"></div>
+
+    <!-- 墙上散贴做旧照片 -->
+    <div class="wall-photo wp1"><img src="assets/p7-b-huangqiang.jpg" alt=""></div>
+    <div class="wall-photo wp2"><img src="assets/p7-c-hongzhuan.jpg" alt=""></div>
+    <div class="wall-photo wp3"><img src="assets/p7-d-mise.jpg" alt=""></div>
+    <div class="wall-photo wp4"><img src="assets/p7-a-final.jpg" alt=""></div>
+
+    <!-- 左上日晷（辰时） -->
+    <div class="dial-btn" id="dialBtn"></div>
+
+    <!-- 中上：专栏摘抄 -->
+    <div class="quote">
+      <span class="txt">「爬满爬山虎的青砖楼，门口一对石球。」</span>
+      <span class="cap">姚颖 · 京话专栏 · 摘抄</span>
+    </div>
+
+    <!-- 中央：2×2 老照片 -->
+    <div class="grid" id="grid"></div>
+
+    <!-- 放大查看 -->
+    <div class="viewer" id="viewer">
+      <div class="close" id="viewerClose">×</div>
+      <div class="vp" id="viewerPic"></div>
+      <button class="confirm" id="confirmPick">就是这栋</button>
+    </div>
+
+    <!-- 底部三角背包 -->
+    <div class="bag-tri" id="bagTri"><svg viewBox="0 0 60 52" aria-hidden="true" style="width:100%;height:100%">
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="rgba(217,163,92,.88)"/>
+      <path d="M30 6 L56 46 Q30 54 4 46 Z" fill="none" stroke="#3a2813" stroke-width="2"/>
+      <path d="M16 34 h28" stroke="#3a2813" stroke-width="2.4" stroke-linecap="round"/>
+    </svg></div>
+    <div class="bag-panel" id="bagPanel">
+      <div class="inner"><div class="row" id="bagSlots"></div></div>
+    </div>
+
+    <!-- 老地图 -->
+    <div class="map-modal" id="mapModal">
+      <div class="mapi" id="mapContent"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 全屏日晷 -->
+    <div class="dial-full" id="dialFull">
+      <div class="big" id="dialBig"></div>
+      <span class="cap">辰时 · 上午</span>
+      <span class="sub">民国三十八年 · 一九四九年春</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var curHour=3; /* 辰时 */
+var $=function(s){return document.querySelector(s)};
+
+/* ---------- 日晷 ---------- */
+function dialSVG(hour){
+
+
+  var HN=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  var s='<svg viewBox="0 0 400 400">'
+  +'<defs><radialGradient id="brz" cx="38%" cy="32%" r="78%"><stop offset="0%" stop-color="#7c8b74"/><stop offset="45%" stop-color="#54634f"/><stop offset="78%" stop-color="#33422e"/><stop offset="100%" stop-color="#24301f"/></radialGradient>'
+  +'<radialGradient id="rim" cx="45%" cy="38%" r="80%"><stop offset="0%" stop-color="#8a7a54"/><stop offset="60%" stop-color="#5d4e34"/><stop offset="100%" stop-color="#382d1c"/></radialGradient>'
+  +'<radialGradient id="pat" cx="42%" cy="36%" r="70%"><stop offset="0%" stop-color="rgba(126,168,132,.42)"/><stop offset="55%" stop-color="rgba(96,134,105,.18)"/><stop offset="100%" stop-color="rgba(96,134,105,0)"/></radialGradient></defs>'
+  +'<circle cx="200" cy="200" r="194" fill="#221c12" stroke="rgba(0,0,0,.5)" stroke-width="2"/>'
+  +'<circle cx="200" cy="200" r="184" fill="url(#rim)"/>'
+  +'<circle cx="200" cy="200" r="168" fill="url(#brz)"/>'
+  +'<circle cx="200" cy="200" r="168" fill="url(#pat)" opacity=".5"/>'
+  +'<circle cx="200" cy="200" r="150" fill="none" stroke="rgba(180,196,152,.4)" stroke-width="2"/>'
+  +'<circle cx="200" cy="200" r="132" fill="none" stroke="rgba(180,196,152,.22)" stroke-width="1.5" stroke-dasharray="2 6"/>';
+  for(var i=0;i<12;i++){
+    var a=i*30*Math.PI/180;
+    s+='<line x1="'+(200+Math.sin(a)*180).toFixed(1)+'" y1="'+(200-Math.cos(a)*180).toFixed(1)+'" x2="'+(200+Math.sin(a)*168).toFixed(1)+'" y2="'+(200-Math.cos(a)*168).toFixed(1)+'" stroke="rgba(176,196,150,.55)" stroke-width="2.2"/>';
+    s+='<text x="'+(200+Math.sin(a)*142).toFixed(1)+'" y="'+(200-Math.cos(a)*142+10).toFixed(1)+'" text-anchor="middle" font-size="24" fill="rgba(216,226,184,.9)" font-family="Kaiti SC,STKaiti,serif">'+HN[i]+'</text>';
+  }
+  var ha=hour*30*Math.PI/180;
+  s+='<path d="M200 200 Q232 182 252 198 T284 214" fill="none" stroke="rgba(18,24,14,.6)" stroke-width="2.6" stroke-linecap="round"/>'
+  +'<path d="M200 200 L212 190 L206 178" fill="none" stroke="rgba(18,24,14,.45)" stroke-width="1.6" stroke-linecap="round"/>'
+  +'<line x1="200" y1="200" x2="'+(200+Math.sin(ha)*96).toFixed(1)+'" y2="'+(200-Math.cos(ha)*96).toFixed(1)+'" stroke="#d9c07e" stroke-width="6" stroke-linecap="round"/>'
+  +'<line x1="200" y1="200" x2="'+(200+Math.sin(ha)*96).toFixed(1)+'" y2="'+(200-Math.cos(ha)*96).toFixed(1)+'" stroke="#8a6a35" stroke-width="2.4" stroke-linecap="round"/>'
+  +'<path d="M'+(200+Math.sin(ha+Math.PI/2)*38).toFixed(1)+' '+(200-Math.cos(ha+Math.PI/2)*38).toFixed(1)+' L'+(200+Math.sin(ha)*74).toFixed(1)+' '+(200-Math.cos(ha)*74).toFixed(1)+' L'+(200+Math.sin(ha-Math.PI/2)*38).toFixed(1)+' '+(200-Math.cos(ha-Math.PI/2)*38).toFixed(1)+'" fill="none" stroke="#d9c07e" stroke-width="3.2" stroke-linecap="round"/>'
+  +'<circle cx="200" cy="200" r="24" fill="#2b2415" stroke="rgba(200,178,120,.55)" stroke-width="2.5"/>'
+  +'<circle cx="200" cy="200" r="7" fill="#d9c07e"/></svg>';
+  return s;
+}
+$('#dialBtn').innerHTML=dialSVG(curHour);
+var dialFull=$('#dialFull');
+$('#dialBtn').addEventListener('click',function(e){e.stopPropagation();$('#dialBig').innerHTML=dialSVG(curHour);dialFull.classList.add('on');});
+dialFull.addEventListener('click',function(){dialFull.classList.remove('on');});
+
+/* ---------- 四张照片 ---------- */
+var PHOTOS=[
+  {name:'青砖洋楼 · 颐和路',  src:'assets/p7-a-final.jpg',     ans:true},
+  {name:'黄墙公馆 · 颐和路',  src:'assets/p7-b-huangqiang.jpg',ans:false},
+  {name:'红砖小楼 · 颐和路',  src:'assets/p7-c-hongzhuan.jpg', ans:false},
+  {name:'转角洋楼 · 颐和路',  src:'assets/p7-d-mise.jpg',      ans:false}
+];
+var order=[0,1,2,3];
+/* 打乱顺序，答案不固定位置 */
+(function(){
+  for(var i=order.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=order[i];order[i]=order[j];order[j]=t;
+  }
+})();
+var grid=$('#grid');
+var nodes={};
+order.forEach(function(oi){
+  var p=PHOTOS[oi];
+  var d=document.createElement('div');d.className='photo';d.dataset.idx=oi;
+  d.innerHTML='<div class="frame-img"><img src="'+p.src+'" alt=""></div>'
+    +'<div class="grain"></div><span class="pno">颐和路 · 旧照</span><span class="tag">选</span>';
+  grid.appendChild(d);nodes[oi]=d;
+});
+function findNode(oi){return nodes[oi]}
+
+/* ---------- 放大查看与判定 ---------- */
+var viewer=$('#viewer'),viewerPic=$('#viewerPic');
+var cur=null;
+Object.keys(nodes).forEach(function(oi){
+  nodes[oi].addEventListener('click',function(e){
+    if(e.target.closest('.tag'))return;
+    cur=oi;
+    var p=PHOTOS[oi];
+    viewerPic.innerHTML='<img src="'+p.src+'" alt=""><span class="vtag">'+p.name+'</span>';
+    viewer.classList.add('on');
+  });
+});
+$('#viewerClose').addEventListener('click',function(){viewer.classList.remove('on');});
+viewer.addEventListener('click',function(e){
+  if(e.target===viewer)viewer.classList.remove('on');
+});
+var locked=false;
+$('#confirmPick').addEventListener('click',function(){
+  if(locked||cur===null)return;
+  var oi=cur;var p=PHOTOS[oi];var node=nodes[oi];
+  if(p.ans){
+    locked=true;viewer.classList.remove('on');
+    node.classList.add('ans');
+    node.querySelector('img').style.filter='none';
+    toast('颐和路 · 十二号 · 陈先生 亲启');
+    setTimeout(function(){dialFull.classList.add('on');toast('门牌对上了——翻过这一页');},1500);
+    setTimeout(function(){
+      var st=document.querySelector('.stage');
+      st.style.transition='opacity .9s ease';st.style.opacity='0';
+      setTimeout(function(){location.href='第二幕-题3-打字机密码.html';},950);
+    },4200);
+  }else{
+    node.classList.remove('wrong');void node.offsetWidth;node.classList.add('wrong');
+    toast('不是这一栋……');
+  }
+});
+
+/* ---------- 背包（7 槽：6 遗物 + 老地图） ---------- */
+var bag=$('#bagPanel');
+$('#bagTri').addEventListener('click',function(e){
+  e.stopPropagation();bag.classList.toggle('on');
+});
+var slots=[
+  {nm:'信',icon:'✉'},{nm:'明信片',icon:'☐'},{nm:'钥匙',icon:'⌁'},
+  {nm:'照片',icon:'◫'},{nm:'小票',icon:'✎'},{nm:'样书',icon:'≡'},
+  {nm:'老地图',icon:'⌖',map:true}
+];
+(function(){
+  var row=$('#bagSlots');
+  slots.forEach(function(s){
+    var d=document.createElement('div');
+    d.className='slot'+(s.map?' map':'')+(s.map?' lit':'');
+    d.innerHTML=s.icon+(s.map?'':'')+'<span class="nm">'+s.nm+'</span>';
+    if(s.map){
+      d.title='老地图 · 点开对照';
+      d.addEventListener('click',function(e){e.stopPropagation();openMap();});
+    }
+    row.appendChild(d);
+  });
+})();
+document.addEventListener('click',function(e){
+  if(!bag.classList.contains('on'))return;
+  if(!bag.contains(e.target)&&!$('#bagTri').contains(e.target))bag.classList.remove('on');
+});
+
+/* ---------- 老地图 ---------- */
+function openMap(){
+  $('#mapContent').innerHTML=
+    '<div class="mtitle">颐和路 · 老地图（外婆抄）</div>'
+    +'<svg viewBox="0 0 460 220" style="width:100%;height:auto">'
+    +'<path d="M10 150 C120 90 320 200 450 60" stroke="#8a6a3c" stroke-width="3" fill="none" stroke-dasharray="1 6"/>'
+    +'<text x="410" y="52" font-size="13" fill="#6b5130" font-family="Ma Shan Zheng,Kaiti SC,serif">颐和路</text>'
+    /* 门牌节点 */
+    +'<circle cx="120" cy="138" r="14" fill="none" stroke="#6b5130" stroke-width="2"/>'
+    +'<text x="120" y="143" text-anchor="middle" font-size="13" fill="#6b5130">十一</text>'
+    +'<text x="120" y="162" text-anchor="middle" font-size="11" fill="#8a6a3c">歪脖子枫杨</text>'
+    +'<circle cx="262" cy="118" r="16" fill="#d9a35c" stroke="#6b5130" stroke-width="2.4"/>'
+    +'<text x="262" y="123" text-anchor="middle" font-size="13" fill="#3a2813">十二</text>'
+    +'<text x="262" y="92" text-anchor="middle" font-size="11" fill="#6b5130">青砖 · 石球</text>'
+    +'<circle cx="400" cy="96" r="14" fill="none" stroke="#6b5130" stroke-width="2"/>'
+    +'<text x="400" y="101" text-anchor="middle" font-size="13" fill="#6b5130">十三</text>'
+    +'<text x="400" y="120" text-anchor="middle" font-size="11" fill="#8a6a3c">黄墙洋楼</text>'
+    /* 参照树 */
+    +'<path d="M104 128 l6 9 M116 128 l-6 9 M110 122 l0 16" stroke="#6b5130" stroke-width="1.6" fill="none"/>'
+    +'<path d="M246 108 l6 9 M258 108 l-6 9 M252 102 l0 16" stroke="#6b5130" stroke-width="1.6" fill="none"/>'
+    +'<path d="M384 86 l6 9 M396 86 l-6 9 M390 80 l0 16" stroke="#6b5130" stroke-width="1.6" fill="none"/>'
+    +'</svg>'
+    +'<div class="mfoot">外婆留下的旧地图。信封上写着 ——<br>「颐和路十二号 · 陈先生 · 亲启」</div>';
+  $('#mapModal').classList.add('on');
+}
+$('#mapModal').addEventListener('click',function(e){
+  if(e.target===$('#mapModal')||e.target.classList.contains('mclose'))$('#mapModal').classList.remove('on');
+});
+
+/* toast */
+var toastT=null;
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);
+}
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>

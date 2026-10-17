@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>序章 · 明信片</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v2H6zm1 4h10v2H7zm0 4h10v2H7zm-2 8h14a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2z' fill='%23d9a35c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  background:radial-gradient(120% 100% at 50% 10%,#1c2a26 0%,#101b18 50%,#070d0b 100%);
+  color:#f2e7cf;overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+.page{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{
+  position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;
+  background:radial-gradient(120% 100% at 50% 8%,#20302b 0%,#0d1613 55%,#050a08 100%);
+  box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
+  overflow:hidden;animation:stageIn .7s ease-out both;
+}
+@keyframes stageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.vignette{position:absolute;z-index:4;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(5,10,8,.34) 0%,transparent 26%,transparent 82%,rgba(4,8,6,.46) 100%)}
+
+/* ============ 左上日晷（亥时，金光提示可拨） ============ */
+.sundial{position:absolute;z-index:30;left:clamp(14px,2.4vmin,26px);top:clamp(12px,2.1vmin,22px);
+  width:clamp(34px,4.6vmin,50px);height:clamp(34px,4.6vmin,50px);cursor:pointer;border:0;background:none;padding:0}
+.sundial svg{width:100%;height:100%;display:block;overflow:visible;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}
+.sundial .glow-ring{animation:goldGlow 2.4s ease-in-out infinite}
+@keyframes goldGlow{0%,100%{opacity:.35}50%{opacity:.9}}
+.sundial.guide .glow-ring{opacity:1;animation:goldPulse .7s ease-in-out infinite}
+@keyframes goldPulse{0%,100%{opacity:.45}50%{opacity:1}}
+
+/* ============ 标题 ============ */
+.title{position:absolute;z-index:20;left:0;right:0;top:clamp(14px,2.6vmin,26px);text-align:center;pointer-events:none}
+.title .pre{display:block;font-size:clamp(10px,1.5vmin,14px);color:#9aa89a;letter-spacing:.55em;margin-bottom:.35em}
+.title h1{font-size:clamp(24px,4.6vmin,46px);font-weight:700;color:#f0e3c4;letter-spacing:.32em;text-indent:.32em;
+  text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.title .rule{display:block;width:clamp(80px,18vmin,180px);height:1px;margin:.55em auto 0;
+  background:linear-gradient(90deg,transparent,#c9a86a,transparent)}
+
+/* ============ 五张明信片扇形 ============ */
+.cards{position:absolute;z-index:15;left:50%;top:50%;width:clamp(340px,74vmin,820px);
+  height:clamp(200px,42vmin,470px);transform:translate(-50%,-46%);pointer-events:none}
+.pc{position:absolute;width:clamp(128px,24vmin,270px);height:auto;aspect-ratio:3/2;cursor:pointer;
+  pointer-events:auto;perspective:900px;
+  transition:left .55s ease,top .55s ease,transform .55s cubic-bezier(.2,.9,.3,1),opacity .4s ease,filter .4s ease}
+.pc:hover{filter:brightness(1.07)}
+.cards .pc:nth-child(1){left:-20%;top:42.2%;transform:translate(-50%,-50%) rotate(-26deg)}
+.cards .pc:nth-child(2){left:15%;top:46.1%;transform:translate(-50%,-50%) rotate(-13deg)}
+.cards .pc:nth-child(3){left:50%;top:50%;transform:translate(-50%,-50%) rotate(0);width:clamp(165px,31vmin,350px);z-index:14}
+.cards .pc:nth-child(4){left:85%;top:46.1%;transform:translate(-50%,-50%) rotate(13deg)}
+.cards .pc:nth-child(5){left:120%;top:42.2%;transform:translate(-50%,-50%) rotate(26deg)}
+/* 展开查看：归中放大 */
+.cards .pc.expanded{left:50%;top:50%;transform:translate(-50%,-50%) scale(1.7);z-index:60;
+  transition:left .55s ease,top .55s ease,transform .55s cubic-bezier(.2,.9,.3,1)}
+.cards:has(.pc.expanded) .pc:not(.expanded){opacity:.42;filter:blur(1.5px) brightness(.9)}
+/* 翻卡导航：展开后可顺序翻完五张，避免被放大的卡片挡住 */
+.pc-nav{position:absolute;z-index:70;right:3.2%;top:5.2%;display:none;align-items:center;gap:6px;
+  padding:5px 8px;border-radius:999px;background:rgba(18,26,21,.78);
+  border:1px solid rgba(217,163,92,.45);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.pc-nav.on{display:flex}
+.pc-nav button{width:26px;height:26px;border-radius:50%;color:#e9d9a8;font-size:16px;line-height:1;
+  display:flex;align-items:center;justify-content:center;border:1px solid rgba(217,163,92,.35)}
+.pc-nav button:hover{background:rgba(217,163,92,.16)}
+.pc-nav span{font-size:10px;letter-spacing:.14em;color:#cdb98a;min-width:38px;text-align:center}
+@media (max-width:640px){
+  .pc-nav{top:2%;bottom:auto;right:3%;transform:none;padding:3px 6px;gap:4px}
+  .pc-nav button{width:22px;height:22px;font-size:14px}
+  .pc-nav span{min-width:32px;font-size:9px}
+  .cards .pc.expanded{transform:translate(-50%,-50%) scale(1.12)}
+  .stage:has(.pc.expanded) .title,
+  .stage:has(.pc.expanded) .pencil-note{opacity:0}
+}
+.pc-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.3,.9,.3,1)}
+.pc.flipped .pc-inner{transform:rotateY(180deg)}
+.pc-face,.pc-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:clamp(5px,1vmin,10px);overflow:hidden;
+  box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.pc-face{border:clamp(4px,1vmin,9px) solid #e8dcc0;
+  background:#e8dcc0}
+.pc-face img{width:100%;height:100%;object-fit:cover;display:block}
+.pc-back{transform:rotateY(180deg);background:radial-gradient(120% 120% at 50% 40%,#ece3cf 0%,#cfc3a5 70%,#b7a987 100%);
+  border:clamp(4px,1vmin,9px) solid #d8cdb2;display:flex;align-items:center;justify-content:center}
+.pc-back svg{width:78%;height:78%;display:block}
+/* 旧片与新片 */
+.pc.old .pc-face{filter:sepia(.55) contrast(.96) brightness(.94)}
+.pc.old{border:none}
+.pc.new .pc-face{border-color:#f4ecd8}
+.pc .tag{position:absolute;left:8%;bottom:7%;z-index:3;pointer-events:none;
+  font-size:clamp(10px,1.5vmin,15px);color:#6b5b3f;letter-spacing:.14em;text-shadow:0 1px 2px rgba(255,255,255,.5)}
+.pc.old .tag{color:#7a6848}
+.pc .stamp{position:absolute;right:7%;top:8%;z-index:3;pointer-events:none;transform:rotate(8deg);
+  width:clamp(30px,5.6vmin,64px);height:clamp(22px,4vmin,46px);
+  border:2px dashed rgba(140,90,50,.55);border-radius:6px;opacity:.8}
+.pc .stamp::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:60%;height:60%;border-radius:50%;border:2px solid rgba(140,90,50,.4)}
+
+/* 外婆铅笔字 */
+.pencil-note{position:absolute;z-index:20;left:0;right:0;bottom:16%;text-align:center;pointer-events:none;
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;
+  font-size:clamp(17px,3vmin,30px);color:#d9cdab;letter-spacing:.22em;
+  text-shadow:0 1px 4px rgba(0,0,0,.55),0 0 18px rgba(0,0,0,.3)}
+
+/* 引导气泡 */
+.bubble{position:absolute;z-index:35;left:50%;top:31%;transform:translate(-50%,0) scale(.92);opacity:0;
+  pointer-events:none;max-width:78%;text-align:center;transition:opacity .5s,transform .5s;
+  background:rgba(16,22,19,.9);border:1px solid rgba(216,190,130,.55);color:#f2e7cd;
+  padding:.7em 1.1em;border-radius:10px;font-size:clamp(13px,2vmin,19px);letter-spacing:.08em;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)}
+.bubble.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.bubble .arrow{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
+  width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;
+  border-top:9px solid rgba(216,190,130,.55)}
+
+/* ============ 底部三角（背包） ============ */
+.tri-btn{position:absolute;z-index:36;left:46.3%;bottom:clamp(6px,1.1vmin,12px);width:7.4%;height:5.2%;
+  min-width:52px;min-height:30px;border:0;background:transparent;cursor:pointer;padding:0;opacity:.92}
+.tri-btn:hover{opacity:1}
+.tri-btn svg{width:100%;height:100%;display:block;overflow:visible}
+.scrim{position:absolute;inset:0;z-index:40;background:rgba(6,10,8,.55);opacity:0;pointer-events:none;transition:opacity .35s}
+.scrim.on{opacity:1;pointer-events:auto}
+.inventory-panel{position:absolute;left:0;right:0;bottom:0;z-index:41;transform:translateY(103%);
+  transition:transform .48s cubic-bezier(.22,.9,.3,1);
+  background:linear-gradient(180deg,rgba(38,50,42,.97),rgba(22,30,26,.98) 45%,rgba(11,15,13,.99));
+  border-top:1px solid rgba(217,163,92,.42);box-shadow:0 -14px 44px rgba(0,0,0,.55);
+  padding:clamp(10px,1.6vmin,18px) clamp(12px,2.6vmin,30px) clamp(16px,2.8vmin,30px)}
+.inventory-panel.open{transform:translateY(0)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(10px,1.5vmin,16px)}
+.panel-title{font-size:clamp(13px,2.1vmin,19px);font-weight:600;color:#f2dcaa;letter-spacing:.1em}
+.panel-title em{font-style:normal;font-size:.72em;color:#a8986f;letter-spacing:.05em}
+.panel-close{background:none;border:0;color:#d9b97f;font-size:clamp(16px,2.6vmin,24px);line-height:1;cursor:pointer;padding:4px 6px}
+.item-grid{display:flex;gap:clamp(8px,1.5vmin,16px);justify-content:center}
+.item-slot{width:clamp(52px,8.2vmin,92px);aspect-ratio:1/1;border:1px solid rgba(255,214,140,.8);border-radius:9px;
+  background:rgba(50,36,18,.65);display:flex;align-items:center;justify-content:center;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,190,110,.18),0 0 14px rgba(255,190,110,.16)}
+.item-slot img{width:86%;height:86%;object-fit:contain;display:block;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.slot-name{position:absolute;left:50%;bottom:-1.35em;transform:translateX(-50%);
+  font-size:clamp(10px,1.35vmin,13px);color:#e9dab8;white-space:nowrap;opacity:.9;letter-spacing:.04em}
+.item-slot{position:relative}
+
+/* ============ 全屏日晷 ============ */
+.sundial-full{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(90% 90% at 50% 50%,rgba(20,26,22,.82),rgba(5,8,7,.95))}
+.sundial-full.on{display:flex}
+.dial{position:relative;width:clamp(280px,62vmin,680px);aspect-ratio:1/1;filter:drop-shadow(0 24px 60px rgba(0,0,0,.6))}
+.dial svg{width:100%;height:100%;display:block;overflow:visible}
+.dial-note{position:absolute;left:0;right:0;bottom:-13%;text-align:center;pointer-events:none;
+  font-family:"Ma Shan Zheng","Kaiti SC",cursive;font-size:clamp(15px,2.6vmin,26px);color:#cfc3a0;
+  letter-spacing:.15em;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.dial .crack{opacity:.85}
+
+/* 盘面时辰点击区 */
+.dial-zone{position:absolute;width:31%;aspect-ratio:1/1;cursor:pointer;border-radius:50%;
+  transform:translate(-50%,-50%)}
+.dial-zone:hover{background:radial-gradient(circle,rgba(230,200,130,.22),transparent 70%)}
+
+/* 转场淡出 */
+.fade-out{transition:opacity .5s ease !important;opacity:0 !important}
+.toast{position:absolute;z-index:55;left:50%;top:11%;transform:translate(-50%,-8px);opacity:0;
+  pointer-events:none;max-width:84%;text-align:center;
+  background:rgba(15,20,17,.88);border:1px solid rgba(217,163,92,.5);color:#f6ecd4;
+  padding:.5em 1em;border-radius:6px;font-size:clamp(12px,1.8vmin,16px);letter-spacing:.06em;transition:opacity .3s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.pc-inner,.sundial .glow-ring{animation:none;transition:none}}
+</style>
+<style id="dh-style">
+/* ===== 日晷增强（青铜金纹 + 拨动金光） ===== */
+.sundial,.dial-btn{position:relative;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(201,168,106,.22));transition:filter .5s ease}
+.sundial:hover,.dial-btn:hover{filter:drop-shadow(0 5px 16px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(233,196,120,.6))}
+.sundial::before,.dial-btn::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,210,132,.5) 0%,rgba(255,210,132,.13) 42%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;transition:opacity .35s ease}
+.sundial.dh-glow::before,.dial-btn.dh-glow::before{opacity:1;animation:dhGlowPulse 1.05s ease-out}
+@keyframes dhGlowPulse{0%{transform:scale(.84);opacity:.95}100%{transform:scale(1.2);opacity:0}}
+.sundial .dh-ring,.dial-btn .dh-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:.92;filter:drop-shadow(0 0 3px rgba(255,205,120,.45))}
+</style></head>
+<body>
+<div class="page" id="page">
+  <div class="stage" id="stage">
+    <div class="vignette" aria-hidden="true"></div>
+
+    <!-- 左上日晷（亥时 · 可拨） -->
+    <button class="sundial" id="sundialBtn" aria-label="拨动日晷">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="bronze" cx="38%" cy="32%" r="75%">
+            <stop offset="0%" stop-color="#8f9a82"/><stop offset="55%" stop-color="#5d6f5e"/><stop offset="100%" stop-color="#35442f"/>
+          </radialGradient>
+          <radialGradient id="rim" cx="45%" cy="38%" r="80%">
+            <stop offset="0%" stop-color="#a8b295"/><stop offset="100%" stop-color="#46523c"/>
+          </radialGradient>
+        </defs>
+        <circle class="glow-ring" cx="50" cy="50" r="49" fill="none" stroke="#ffd98a" stroke-width="2.5"/>
+        <circle cx="50" cy="50" r="46" fill="url(#rim)"/>
+        <circle cx="50" cy="50" r="40" fill="url(#bronze)"/>
+        <g stroke="#caa86a" stroke-width="1.6" opacity=".85">
+          <line x1="50" y1="12" x2="50" y2="20"/><line x1="50" y1="80" x2="50" y2="88"/>
+          <line x1="12" y1="50" x2="20" y2="50"/><line x1="80" y1="50" x2="88" y2="50"/>
+          <line x1="23" y1="23" x2="28.5" y2="28.5"/><line x1="71.5" y1="71.5" x2="77" y2="77"/>
+          <line x1="77" y1="23" x2="71.5" y2="28.5"/><line x1="28.5" y1="71.5" x2="23" y2="77"/>
+        </g>
+        <!-- 晷针：亥时 330° -->
+        <g class="mini-hand" transform="rotate(330 50 50)">
+          <path d="M50 54 L47.6 20 L52.4 20 Z" fill="#d8b064"/>
+          <line x1="50" y1="56" x2="50" y2="70" stroke="#a5874e" stroke-width="1.4"/>
+        </g>
+        <circle cx="50" cy="50" r="2.6" fill="#c9a75f"/>
+      </svg>
+    </button>
+
+    <!-- 标题 -->
+    <div class="title">
+      <span class="pre">序章末</span>
+      <h1>五张明信片</h1>
+      <span class="rule"></span>
+    </div>
+
+    <!-- 五张明信片扇形 -->
+    <div class="cards" id="cards">
+      <div class="pc old" data-hour="195" data-min="180"><div class="pc-inner">
+        <div class="pc-face"><img src="assets/pc-xiaoguan.png" alt="下关明信片"><span class="tag">下关</span><span class="stamp"></span></div>
+        <div class="pc-back"></div></div></div>
+      <div class="pc old" data-hour="277.5" data-min="90"><div class="pc-inner">
+        <div class="pc-face"><img src="assets/pc-jinghaisi.png" alt="静海寺明信片"><span class="tag">静海寺</span><span class="stamp"></span></div>
+        <div class="pc-back"></div></div></div>
+      <div class="pc old" data-hour="0" data-min="0"><div class="pc-inner">
+        <div class="pc-face"><img src="assets/pc-yihelu.png" alt="颐和路明信片"><span class="tag">颐和路</span><span class="stamp"></span></div>
+        <div class="pc-back"></div></div></div>
+      <div class="pc new" data-hour="112.5" data-min="270"><div class="pc-inner">
+        <div class="pc-face"><img src="assets/pc-yuejianglou.png" alt="阅江楼明信片"><span class="tag">阅江楼</span><span class="stamp"></span></div>
+        <div class="pc-back"></div></div></div>
+      <div class="pc new" data-hour="190" data-min="120"><div class="pc-inner">
+        <div class="pc-face"><img src="assets/pc-xianfeng.png" alt="先锋书店明信片"><span class="tag">先锋书店</span><span class="stamp"></span></div>
+        <div class="pc-back"></div></div></div>
+    </div>
+
+    <!-- 翻卡导航 -->
+    <div class="pc-nav" id="pcNav">
+      <button id="pcPrev" aria-label="上一张明信片">‹</button>
+      <span id="pcIdx">1 / 5</span>
+      <button id="pcNext" aria-label="下一张明信片">›</button>
+    </div>
+
+    <!-- 外婆铅笔字 -->
+    <div class="pencil-note" id="pencilNote">明信片的背面都画着钟。</div>
+
+    <!-- 引导气泡 -->
+    <div class="bubble" id="bubble">
+      <span class="arrow"></span>
+      <span id="bubbleText">拨一拨日晷，看看那些钟指着什么时候。</span>
+    </div>
+
+    <!-- 底部三角 -->
+    <button class="tri-btn" id="invBtn" aria-label="打开背包">
+      <svg viewBox="0 0 100 60">
+        <path d="M12 6 L88 6 L50 52 Z" fill="rgba(26,40,34,.92)" stroke="#d9a35c" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M50 14 L62 34 L38 34 Z" fill="#d9a35c" opacity=".9"/>
+      </svg>
+    </button>
+
+    <!-- 背包面板（6件已收） -->
+    <div class="scrim" id="scrim"></div>
+    <div class="inventory-panel" id="panel">
+      <div class="panel-head">
+        <div class="panel-title">背包<em> · 外婆的旧物</em></div>
+        <button class="panel-close" id="panelClose" aria-label="关闭背包">×</button>
+      </div>
+      <div class="item-grid" id="itemGrid">
+        <div class="item-slot"><img src="assets/item-letter.png" alt="信"><span class="slot-name">信</span></div>
+        <div class="item-slot"><img src="assets/item-postcard.png" alt="明信片"><span class="slot-name">明信片</span></div>
+        <div class="item-slot"><img src="assets/item-key.png" alt="钥匙"><span class="slot-name">钥匙</span></div>
+        <div class="item-slot"><img src="assets/item-photo.png" alt="照片"><span class="slot-name">照片</span></div>
+        <div class="item-slot"><img src="assets/item-receipt.png" alt="小票"><span class="slot-name">小票</span></div>
+        <div class="item-slot"><img src="assets/item-book.png" alt="样书"><span class="slot-name">样书</span></div>
+      </div>
+    </div>
+
+    <!-- 全屏日晷 -->
+    <div class="sundial-full" id="sundialFull">
+      <div class="dial" id="dial">
+        <svg id="dialSvg" viewBox="0 0 400 400"></svg>
+        <div class="dial-note">你拨到哪一天，就看见哪一天。</div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ============ 数据：五张明信片 ============ */
+var CARDS=[
+  {name:'下关',      hour:195,   min:180},
+  {name:'静海寺',    hour:277.5, min:90},
+  {name:'颐和路',    hour:0,     min:0},
+  {name:'阅江楼',    hour:112.5, min:270},
+  {name:'先锋书店',  hour:190,   min:120}
+];
+var FLIP_ANGLES=[-26,-13,0,13,26];
+
+/* 铅笔钟 SVG */
+function clockSVG(hour,min){
+  return '<svg viewBox="0 0 120 120">'+
+    '<circle cx="60" cy="60" r="52" fill="none" stroke="#5b5347" stroke-width="2.6" stroke-dasharray="1.8 2.4" stroke-linecap="round"/>'+
+    '<circle cx="60" cy="60" r="46" fill="rgba(240,232,212,.35)"/>'+
+    '<g stroke="#6a6153" stroke-width="1.5" stroke-dasharray="1 2">'+
+    '<line x1="60" y1="14" x2="60" y2="24"/><line x1="60" y1="96" x2="60" y2="106"/>'+
+    '<line x1="14" y1="60" x2="24" y2="60"/><line x1="96" y1="60" x2="106" y2="60"/>'+
+    '<line x1="27" y1="27" x2="34" y2="34"/><line x1="86" y1="86" x2="93" y2="93"/>'+
+    '<line x1="93" y1="27" x2="86" y2="34"/><line x1="34" y1="86" x2="27" y2="93"/>'+
+    '</g>'+
+    '<g fill="#6a6153" font-size="10.5" font-family="Georgia,serif" text-anchor="middle">'+
+    '<text x="60" y="20">12</text><text x="79" y="32">1</text><text x="93" y="46">2</text>'+
+    '<text x="98" y="64">3</text><text x="93" y="83">4</text><text x="79" y="97">5</text>'+
+    '<text x="60" y="103">6</text><text x="41" y="97">7</text><text x="27" y="83">8</text>'+
+    '<text x="22" y="64">9</text><text x="27" y="46">10</text><text x="41" y="32">11</text>'+
+    '</g>'+
+    '<g transform="rotate('+hour+' 60 60)"><line x1="60" y1="64" x2="60" y2="34" stroke="#4a4238" stroke-width="3.4" stroke-linecap="round"/></g>'+
+    '<g transform="rotate('+min+' 60 60)"><line x1="60" y1="66" x2="60" y2="46" stroke="#5a5143" stroke-width="2.2" stroke-linecap="round"/></g>'+
+    '<circle cx="60" cy="60" r="3.4" fill="#4a4238"/>'+
+    '</svg>';
+}
+
+/* ============ 渲染明信片（静态DOM预置，JS填充背面钟） ============ */
+var cards=document.getElementById('cards');
+var cardEls=Array.prototype.slice.call(cards.querySelectorAll('.pc'));
+function collapseCard(el){
+  el.classList.remove('expanded');
+  /* 缩回时同步翻回正面，避免下次展开仍停在背面 */
+  el.classList.remove('flipped');
+}
+var pcNav=document.getElementById('pcNav');
+var pcIdx=document.getElementById('pcIdx');
+var expandedIdx=-1;
+function openCard(i){
+  /* 点同一张 → 收起 */
+  if(expandedIdx===i){
+    collapseCard(cardEls[i]);
+    expandedIdx=-1;
+    pcNav.classList.remove('on');
+    return;
+  }
+  /* 收起其他卡 */
+  cardEls.forEach(function(c,ci){if(ci!==i)collapseCard(c);});
+  var el=cardEls[i];
+  el.classList.add('expanded');
+  expandedIdx=i;
+  pcIdx.textContent=(i+1)+' / 5';
+  pcNav.classList.add('on');
+  keyClick();
+  /* 稍后自动翻面，展示背面的时间 */
+  setTimeout(function(){
+    if(!el.classList.contains('expanded'))return; /* 已切走，不计为看过 */
+    if(!el.classList.contains('flipped')){
+      el.classList.add('flipped');
+      keyClick();
+    }
+    seen[i]=true;
+    if(seen.every(Boolean))showGuide();
+  },1000);
+}
+cardEls.forEach(function(el,i){
+  el.querySelector('.pc-back').innerHTML=clockSVG(parseFloat(el.dataset.hour),parseFloat(el.dataset.min));
+  el.addEventListener('click',function(){openCard(i);});
+});
+document.getElementById('pcPrev').addEventListener('click',function(e){
+  e.stopPropagation();
+  if(expandedIdx<0)return;
+  openCard((expandedIdx+4)%5);
+});
+document.getElementById('pcNext').addEventListener('click',function(e){
+  e.stopPropagation();
+  if(expandedIdx<0)return;
+  openCard((expandedIdx+1)%5);
+});
+
+/* ============ 状态与音效 ============ */
+var seen=[false,false,false,false,false];
+var AC=window.AudioContext||window.webkitAudioContext;
+var actx=AC?new AC():null;
+function blip(freq,dur,type,vol,when){
+  if(!actx)return;
+  var t=actx.currentTime+(when||0);
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'square';o.frequency.value=freq;
+  g.gain.setValueAtTime(vol||.12,t);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g);g.connect(actx.destination);
+  o.start(t);o.stop(t+dur+.02);
+}
+function keyClick(){if(window.__sfx)window.__sfx.key();}
+function tickTock(){blip(520,.07,'square',.12);blip(660,.06,'square',.10,.11);blip(880,.05,'triangle',.12,.22);}
+function clack(){if(window.__sfx)window.__sfx.carriage();}
+
+var pencilNote=document.getElementById('pencilNote');
+var bubble=document.getElementById('bubble');
+var sundialBtn=document.getElementById('sundialBtn');
+var sundialFull=document.getElementById('sundialFull');
+var dialSvg=document.getElementById('dialSvg');
+var invBtn=document.getElementById('invBtn');
+var panel=document.getElementById('panel');
+var scrim=document.getElementById('scrim');
+var panelClose=document.getElementById('panelClose');
+var toastEl=document.getElementById('toast');
+var toastTimer=null;
+var guided=false;
+function toast(msg){
+  toastEl.textContent=msg;toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){toastEl.classList.remove('show');},2400);
+}
+function showGuide(){
+  if(guided)return;guided=true;
+  bubble.classList.add('show');
+  sundialBtn.classList.add('guide');
+  pencilNote.style.opacity='.5';
+}
+
+/* ============ 背包 ============ */
+var itemGrid=document.getElementById('itemGrid');
+function openInv(force){
+  var willOpen=(typeof force==='boolean')?force:!panel.classList.contains('open');
+  panel.classList.toggle('open',willOpen);
+  scrim.classList.toggle('on',willOpen);
+}
+invBtn.addEventListener('click',function(e){e.stopPropagation();openInv();});
+scrim.addEventListener('click',function(){openInv(false);});
+panelClose.addEventListener('click',function(){openInv(false);});
+
+/* ============ 全屏日晷（青铜盘+十二地支+裂纹） ============ */
+var DIZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var curHour=11; // 亥 = index 11
+var fullOpen=false;
+function drawDial(){
+  var s='';
+  s+='<defs><radialGradient id="dbronze" cx="40%" cy="34%" r="80%"><stop offset="0%" stop-color="#98a38a"/><stop offset="55%" stop-color="#5e705c"/><stop offset="100%" stop-color="#2f3d2b"/></radialGradient>';
+  s+='<radialGradient id="drim" cx="44%" cy="38%" r="82%"><stop offset="0%" stop-color="#b3bda0"/><stop offset="100%" stop-color="#3f4c36"/></radialGradient></defs>';
+  s+='<circle cx="200" cy="200" r="192" fill="url(#drim)"/>';
+  s+='<circle cx="200" cy="200" r="176" fill="url(#dbronze)"/>';
+  /* 外圈十二地支 */
+  for(var i=0;i<12;i++){
+    var a=i*30;
+    var r1=158,r2=172;
+    var x1=200+Math.sin(a*Math.PI/180)*r1, y1=200-Math.cos(a*Math.PI/180)*r1;
+    var x2=200+Math.sin(a*Math.PI/180)*r2, y2=200-Math.cos(a*Math.PI/180)*r2;
+    s+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#c9a86a" stroke-width="2" opacity=".85"/>';
+    var rl=186;
+    var lx=200+Math.sin(a*Math.PI/180)*rl, ly=200-Math.cos(a*Math.PI/180)*rl;
+    s+='<text x="'+lx.toFixed(1)+'" y="'+(ly+7).toFixed(1)+'" font-size="20" fill="#e2d3a8" text-anchor="middle" font-family="Noto Serif SC,serif">'+DIZHI[i]+'</text>';
+  }
+  /* 内圈刻度 */
+  for(var j=0;j<48;j++){
+    var aa=j*7.5;
+    var r3=140,r4=j%4===0?150:145;
+    var x3=200+Math.sin(aa*Math.PI/180)*r3, y3=200-Math.cos(aa*Math.PI/180)*r3;
+    var x4=200+Math.sin(aa*Math.PI/180)*r4, y4=200-Math.cos(aa*Math.PI/180)*r4;
+    s+='<line x1="'+x3.toFixed(1)+'" y1="'+y3.toFixed(1)+'" x2="'+x4.toFixed(1)+'" y2="'+y4.toFixed(1)+'" stroke="#8a977e" stroke-width="'+(j%4===0?2.4:1)+'" opacity=".7"/>';
+  }
+  /* 时代带 */
+  s+='<g font-size="12" fill="#b9c0a6" text-anchor="middle" letter-spacing="2">';
+  s+='<text x="200" y="128">民国三十八年</text><text x="200" y="282">公元二〇二六</text></g>';
+  /* 裂纹 午→申 */
+  s+='<path class="crack" d="M200 62 L196 88 L202 104 L194 130 L200 150 L196 172 L203 190 L197 214" fill="none" stroke="#1f2a1d" stroke-width="1.6" opacity=".7"/>';
+  /* 晷针 */
+  s+='<g class="big-hand" transform="rotate('+(curHour*30)+' 200 200)">';
+  s+='<path d="M200 214 L195 66 L205 66 Z" fill="#d9b264"/>';
+  s+='<line x1="200" y1="216" x2="200" y2="236" stroke="#a5874e" stroke-width="3"/></g>';
+  s+='<circle cx="200" cy="200" r="6" fill="#c9a75f"/>';
+  dialSvg.innerHTML=s;
+  buildZones();
+}
+function buildZones(){
+  /* 12个点击区，角度 = i*30，半径 ~140/400 */
+  for(var i=0;i<12;i++){
+    var a=i*30;
+    var x=200+Math.sin(a*Math.PI/180)*150;
+    var y=200-Math.cos(a*Math.PI/180)*150;
+    var z=document.createElement('div');
+    z.className='dial-zone';
+    z.style.left=(x/4)+'%';z.style.top=(y/4)+'%';
+    z.dataset.hour=i;
+    z.addEventListener('click',function(e){
+      e.stopPropagation();
+      var h=parseInt(this.dataset.hour,10);
+      setHour(h);
+    });
+    dialSvg.parentNode.appendChild(z);
+  }
+}
+function setHour(h){
+  if(h===curHour)return;
+  curHour=h;
+  var hand=dialSvg.querySelector('.big-hand');
+  hand.setAttribute('transform','rotate('+(h*30)+' 200 200)');
+  clack();
+  if(h===2){ /* 卯时 → 转场读信 */
+    toast('卯时 · 清晨——该读那封信了。');
+    setTimeout(function(){
+      document.getElementById('page').classList.add('fade-out');
+      setTimeout(function(){window.location.href='第一幕-读信.html';},520);
+    },900);
+  }else{
+    toast('现在是：'+DIZHI[h]+'时');
+  }
+}
+function openFull(){
+  fullOpen=true;
+  drawDial();
+  sundialFull.classList.add('on');
+  tickTock();
+}
+sundialBtn.addEventListener('click',function(){openFull();});
+sundialFull.addEventListener('click',function(e){
+  if(e.target===sundialFull){sundialFull.classList.remove('on');fullOpen=false;}
+});
+
+/* 开场：翻完才引导；日晷随时可拨 */
+})();
+</script>
+<audio id="dhKeySnd" src="assets/typewriter-key.mp3" preload="auto"></audio>
+<audio id="dhDingSnd" src="assets/typewriter-ding.mp3" preload="auto"></audio>
+<audio id="dhCarSnd" src="assets/typewriter-carriage.mp3" preload="auto"></audio>
+<script id="dh-sfx">
+(function(){
+/* 真实打字机音效层 */
+window.__sfx={
+  key:function(){try{var a=document.getElementById('dhKeySnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  ding:function(){try{var a=document.getElementById('dhDingSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},
+  carriage:function(){try{var a=document.getElementById('dhCarSnd');a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+};
+/* 日晷刻度环 overlay + 拨动金光 */
+var NS='http://www.w3.org/2000/svg';
+function addRing(d){
+  if(d.querySelector('.dh-ring'))return;
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','dh-ring');
+  var g=document.createElementNS(NS,'g');
+  var rim=document.createElementNS(NS,'circle');
+  rim.setAttribute('cx','50');rim.setAttribute('cy','50');rim.setAttribute('r','46');
+  rim.setAttribute('fill','none');rim.setAttribute('stroke','rgba(214,178,106,.95)');rim.setAttribute('stroke-width','2.4');
+  g.appendChild(rim);
+  var names=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  for(var i=0;i<12;i++){
+    var a=(i*30-90)*Math.PI/180;
+    var inner=42,outer=(i%3===0)?45.5:43.5;
+    var ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',50+inner*Math.cos(a));ln.setAttribute('y1',50+inner*Math.sin(a));
+    ln.setAttribute('x2',50+outer*Math.cos(a));ln.setAttribute('y2',50+outer*Math.sin(a));
+    ln.setAttribute('stroke','rgba(240,205,120,.95)');ln.setAttribute('stroke-width',i%3===0?'1.6':'1');ln.setAttribute('stroke-linecap','round');
+    g.appendChild(ln);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',50+30*Math.cos(a));t.setAttribute('y',50+30*Math.sin(a)+3);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','6.6');
+    t.setAttribute('fill','rgba(233,208,158,.95)');t.setAttribute('font-family','Kaiti SC,STKaiti,serif');
+    t.textContent=names[i];g.appendChild(t);
+  }
+  svg.appendChild(g);d.appendChild(svg);
+  var timer=null;
+  function glow(){d.classList.remove('dh-glow');void d.offsetWidth;d.classList.add('dh-glow');if(timer)clearTimeout(timer);timer=setTimeout(function(){d.classList.remove('dh-glow');},1100);}
+  try{
+    var ob=new MutationObserver(function(muts){for(var k=0;k<muts.length;k++){if(muts[k].type==='attributes'){glow();break;}}});
+    ob.observe(d,{subtree:true,attributes:true,attributeFilter:['transform','style']});
+  }catch(e){}
+  d.addEventListener('click',glow);
+}
+function init(){var ds=document.querySelectorAll('.sundial,.dial-btn');for(var i=0;i<ds.length;i++)addRing(ds[i]);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script></body>
+</html>
